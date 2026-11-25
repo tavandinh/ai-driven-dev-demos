@@ -57,8 +57,16 @@ EMBED_CSS = """
       .embed-bar-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 2px 8px; }
       .embed .sample-group { display: grid; grid-template-columns: 1fr 1.7fr 1fr; gap: 6px; }
       .embed .sample-label { grid-column: 1 / -1; color: var(--muted); }
-      .embed .sample-group button { min-height: 38px; padding: 4px 6px; border: 1px solid #9aa5b1; border-radius: 6px; background: #fff; font-size: 13px; white-space: normal; line-height: 1.25; }
-      .embed .sample-group button[data-sample="approval"] { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: bold; }
+      .embed .sample-group button { min-height: 40px; padding: 4px 6px; border: 1px solid #9aa5b1; border-radius: 6px; background: #fff; color: var(--ink); font-size: 13px; white-space: normal; line-height: 1.25; transition: background-color 0.15s, border-color 0.15s; }
+      .embed .sample-group button:hover { background: var(--accent-soft); border-color: var(--accent); }
+      .embed .sample-group button:active { transform: translateY(1px); }
+      .embed .sample-group button[data-sample="approval"] { border: 2px solid var(--accent); color: var(--accent); font-weight: bold; }
+      .embed .sample-group button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: bold; }
+      .embed .sample-group button[aria-pressed="true"]::before { content: "✓ "; }
+      .embed-sample-status { margin: 0; padding: 4px 8px; border-radius: 4px; background: var(--ok-soft); color: var(--ok); font-size: 12px; }
+      .embed-sample-status:empty { display: none; }
+      @keyframes embed-flash { from { box-shadow: 0 0 0 4px #f0b400; } to { box-shadow: 0 0 0 4px rgba(240, 180, 0, 0); } }
+      .embed .embed-flash { animation: embed-flash 1.8s ease-out; border-radius: 8px; }
       .embed-options summary { cursor: pointer; color: var(--accent); padding: 2px 0; }
       .embed-options[open] summary { margin-bottom: 4px; }
       .embed-options label { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: 4px 0; white-space: normal; }
@@ -102,6 +110,50 @@ EMBED_CSS = """
 """.replace("NARROW", NARROW)
 
 
+# Embed-only UI feedback for the sample buttons. It is a separate script that runs after
+# the business script (which fills the form on the same click) and only reads the result:
+# it marks the pressed button, says what happened, and scrolls to the part that changed.
+EMBED_UI_JS = """    <script>
+      // Embed-only UI feedback (build_embed.py). No business logic: the business script above
+      // fills the form on the same click; this only shows which sample is active and where to look.
+      (() => {
+        const $ = (s) => document.querySelector(s);
+        const buttons = [...document.querySelectorAll(".sample-group [data-sample]")];
+        const status = $("#embed-sample-status");
+        const screen = $("#screen");
+        const smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const total = () => $("#f-total").textContent.trim();
+        const feedback = {
+          normal: () => [$("#btn-confirm").closest(".scr-buttons"), `「通常」を入力しました（合計 ${total()} 円）。そのまま［確認］を押せます。`],
+          approval: () => [$("#f-approver").closest("fieldset"), `「高額（承認あり）」を入力しました（合計 ${total()} 円）。承認者が必須になり、選ぶまで［確認］は押せません。`],
+          error: () => [$(".field-error:not(:empty)")?.closest("fieldset") || screen, "「エラー」を入力しました。各項目の下にエラーが表示されます。"],
+        };
+        const press = (key) => buttons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.sample === key)));
+        press(null);
+        for (const b of buttons) {
+          b.addEventListener("click", () => {
+            const key = b.dataset.sample;
+            press(key);
+            const [target, text] = feedback[key]();
+            status.textContent = text;
+            target.classList.remove("embed-flash");
+            void target.offsetWidth;
+            target.classList.add("embed-flash");
+            target.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "center" });
+          });
+        }
+        // Back to the initial state (クリア / 新規受注): no sample is active any more.
+        new MutationObserver(() => {
+          if (screen.dataset.state === "ST-01") {
+            press(null);
+            status.textContent = "";
+          }
+        }).observe(screen, { attributes: true, attributeFilter: ["data-state"] });
+      })();
+    </script>
+"""
+
+
 def replace_once(text: str, old: str, new: str) -> str:
     if text.count(old) != 1:
         raise SystemExit(f"expected exactly one {old!r} in the generated HTML")
@@ -132,6 +184,7 @@ def regroup_review_bar(out: str) -> str:
         '      <span class="sample-label">サンプル入力</span>\n      '
         + "\n      ".join(buttons)
         + "\n    </div>\n"
+        '    <p id="embed-sample-status" class="embed-sample-status" role="status" aria-live="polite"></p>\n'
         '    <details class="embed-options">\n'
         "      <summary>その他の操作（ログインユーザー・ID表示）</summary>\n"
         f"      {user}\n      {ids}\n"
@@ -165,6 +218,7 @@ def build_embed(full: str) -> str:
     out = replace_once(out, "  <body>\n", "  <body>\n" + intro)
     out = regroup_review_bar(out)
     out = replace_once(out, "<h3>領域一覧</h3>", note + "<h3>領域一覧</h3>")
+    out = replace_once(out, "  </body>\n</html>", EMBED_UI_JS + "  </body>\n</html>")
     return out
 
 

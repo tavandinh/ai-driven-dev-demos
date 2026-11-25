@@ -112,3 +112,32 @@ test('embed 360: required validation and ID links from the collapsible panel', a
   await page.selectOption('#demo-user', 'U101');
   await expect(page.locator('#f-user')).toContainText('U101');
 });
+
+test('embed 360: sample buttons show which one is active and where the result is', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 360, height: 500 });
+  const errors = await open(page);
+  const btn = (k) => page.locator(`[data-sample="${k}"]`);
+  for (const k of ['normal', 'approval', 'error'])
+    await expect(btn(k)).toHaveAttribute('aria-pressed', 'false');
+
+  await btn('approval').click();
+  await expect(btn('approval')).toHaveAttribute('aria-pressed', 'true');
+  await expect(btn('normal')).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.locator('#embed-sample-status')).toContainText('1,216,600');
+  await expect(page.locator('#f-approver')).toBeInViewport();
+
+  await btn('normal').click();
+  await expect(btn('normal')).toHaveAttribute('aria-pressed', 'true');
+  await expect(btn('approval')).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.locator('#btn-confirm')).toBeInViewport();
+
+  // クリア (EV-10, MSG-Q001 accepted) returns to ST-01: no sample is active any more.
+  page.once('dialog', (d) => d.accept());
+  await page.click('#btn-clear');
+  await expect(page.locator('#screen')).toHaveAttribute('data-state', 'ST-01');
+  await expect(btn('normal')).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.locator('#embed-sample-status')).toBeHidden();
+  expect(errors).toEqual([]);
+});

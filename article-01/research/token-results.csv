@@ -1,0 +1,14 @@
+id,format,representation,chars,utf8_bytes,o200k_base,cl100k_base,claude_tokens,claude_model,note,o200k_vs_md
+xlsx_structured,Excel,"Structured text (openpyxl, own extractor)",9790,18355,6321,7801,8442,claude-haiku-5-5,"1 line per row, cells joined by ' | ', 1 block per sheet",1.04
+xlsx_markitdown,Excel,Markdown via MarkItDown,23977,32482,13200,12664,17986,claude-haiku-5-5,markitdown 0.1.9 (pandas → HTML → Markdown),2.18
+md_raw,Markdown,Raw Markdown,9854,17289,6065,7403,8259,claude-haiku-5-5,headings + pipe tables + text wireframe,1.00
+html_raw,HTML,Raw HTML (full file),66343,74965,24610,25824,32744,claude-haiku-5-5,"includes CSS, JS and the interactive preview",4.06
+html_no_css_js,HTML,HTML without <style>/<script>,34021,41800,15230,16536,19234,claude-haiku-5-5,markup of spec tables + preview form,2.51
+html_spec_only,HTML,HTML spec tables only,25778,32951,12819,14015,16017,claude-haiku-5-5,also without the preview form markup,2.11
+html_markitdown,HTML,Markdown via MarkItDown,12687,20372,7933,9361,10327,claude-haiku-5-5,markitdown 0.1.9 (markdownify),1.31
+html_spec_nolinks,HTML (variant),"HTML spec tables only, ID links unwrapped",20748,27921,10503,11702,13240,claude-haiku-5-5,shows what the cross-reference links cost,1.73
+html_css_only,HTML (part),CSS only,10387,10403,3480,3473,4603,claude-haiku-5-5,component of html_raw,0.57
+html_js_only,HTML (part),JavaScript only,21929,22756,5896,5811,8911,claude-haiku-5-5,component of html_raw,0.97
+html_preview_only,HTML (part),Preview form markup only,8243,8849,2411,2521,3209,claude-haiku-5-5,component of html_raw,0.40
+json_source,Reference,JSON source (order_spec.json),15560,21735,7611,8630,9079,claude-haiku-5-5,single source the three files are generated from,1.25
+xlsx_raw_xml,Reference,Unzipped .xlsx XML parts,146133,154638,71649,73007,,,not a realistic input; shows why a parser is needed,11.81

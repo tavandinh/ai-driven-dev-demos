@@ -1,0 +1,176 @@
+<div class="preview" id="preview">
+  <div class="review-bar" role="group" aria-label="レビュー用操作（仕様外）">
+    <span class="review-tag">レビュー用操作（仕様外）</span>
+    <label
+      >ログインユーザー
+      <select id="demo-user">
+        <option value="U001">山田 太郎（U001）</option>
+        <option value="U101">佐藤 花子（U101）</option>
+      </select>
+    </label>
+    <label class="check"><input type="checkbox" id="demo-ids" /> 項目IDと領域を表示</label>
+    <span class="sample-group"
+      >サンプル入力
+      <button type="button" data-sample="normal">通常</button>
+      <button type="button" data-sample="approval">高額（承認あり）</button>
+      <button type="button" data-sample="error">エラー</button>
+    </span>
+    <span class="state-indicator">画面状態：<output id="demo-state">ST-01 初期表示</output></span>
+  </div>
+
+  <div class="preview-body">
+    <div class="screen" id="screen" data-state="ST-01">
+      <header class="scr-header" data-area="A-01">
+        <p class="scr-title">受注登録</p>
+        <p class="scr-user">
+          <a class="spec-badge" href="#ITM-01">ITM-01</a><span id="f-user">山田 太郎（U001）</span>
+        </p>
+      </header>
+
+      <div class="scr-messages" id="scr-messages" data-area="A-02" aria-live="polite" hidden></div>
+
+      <form id="order-form" novalidate>
+        <div id="view-input">
+          <fieldset data-area="A-03">
+            <legend>受注基本情報</legend>
+            <div class="grid">
+              <div class="field">
+                <span class="label">受注番号<a class="spec-badge" href="#ITM-02">ITM-02</a></span>
+                <output id="f-orderNo" class="readonly">（登録時に採番）</output>
+              </div>
+              <div class="field">
+                <label for="f-orderDate"
+                  >受注日<span class="req">必須</span><a class="spec-badge" href="#ITM-03">ITM-03</a></label
+                >
+                <input id="f-orderDate" name="orderDate" inputmode="numeric" placeholder="YYYY-MM-DD" maxlength="10" autocomplete="off" aria-describedby="e-orderDate" />
+                <p class="field-error" id="e-orderDate"></p>
+              </div>
+              <div class="field">
+                <label for="f-customer"
+                  >顧客コード<span class="req">必須</span><a class="spec-badge" href="#ITM-04">ITM-04</a></label
+                >
+                <input id="f-customer" name="customer" placeholder="例：C00001" maxlength="6" autocomplete="off" aria-describedby="e-customer" />
+                <p class="field-error" id="e-customer"></p>
+              </div>
+              <div class="field">
+                <span class="label">顧客名<a class="spec-badge" href="#ITM-05">ITM-05</a></span>
+                <output id="f-customerName" class="readonly"></output>
+              </div>
+              <div class="field">
+                <label for="f-delivery"
+                  >希望納期<span class="req">必須</span><a class="spec-badge" href="#ITM-06">ITM-06</a></label
+                >
+                <input id="f-delivery" name="delivery" inputmode="numeric" placeholder="YYYY-MM-DD" maxlength="10" autocomplete="off" aria-describedby="e-delivery" />
+                <p class="field-error" id="e-delivery"></p>
+              </div>
+              <div class="field">
+                <label for="f-payment"
+                  >支払条件<span class="req">必須</span><a class="spec-badge" href="#ITM-07">ITM-07</a></label
+                >
+                <select id="f-payment" name="payment" aria-describedby="e-payment">
+                  <option value="">選択してください</option>
+                  <option value="01">01：月末締め翌月末払い</option>
+                  <option value="02">02：前払い</option>
+                  <option value="03">03：代金引換</option>
+                </select>
+                <p class="field-error" id="e-payment"></p>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset data-area="A-04">
+            <legend>受注明細</legend>
+            <div class="lines-wrap">
+              <table class="lines">
+                <thead>
+                  <tr>
+                    <th scope="col">No</th>
+                    <th scope="col">商品コード<span class="req">必須</span><a class="spec-badge" href="#ITM-08">ITM-08</a></th>
+                    <th scope="col">商品名<a class="spec-badge" href="#ITM-09">ITM-09</a></th>
+                    <th scope="col">数量<span class="req">必須</span><a class="spec-badge" href="#ITM-10">ITM-10</a></th>
+                    <th scope="col">単価<a class="spec-badge" href="#ITM-11">ITM-11</a></th>
+                    <th scope="col">金額<a class="spec-badge" href="#ITM-12">ITM-12</a></th>
+                    <th scope="col"><span class="visually-hidden">操作</span><a class="spec-badge" href="#BTN-02">BTN-02</a></th>
+                  </tr>
+                </thead>
+                <tbody id="lines"></tbody>
+              </table>
+            </div>
+            <button type="button" id="btn-addLine" class="btn-small">＋ 行追加</button><a class="spec-badge" href="#BTN-01">BTN-01</a>
+          </fieldset>
+
+          <div class="row-2">
+            <fieldset data-area="A-06">
+              <legend>承認情報</legend>
+              <div class="field">
+                <label for="f-approver"
+                  >承認者<span class="req" id="approver-req" hidden>必須</span><a class="spec-badge" href="#ITM-16">ITM-16</a></label
+                >
+                <select id="f-approver" name="approver" aria-describedby="approver-hint e-approver">
+                  <option value="">選択してください</option>
+                </select>
+                <p class="hint" id="approver-hint">合計金額（税込）1,000,000円以上の場合に必須</p>
+                <p class="field-error" id="e-approver"></p>
+              </div>
+            </fieldset>
+            <fieldset data-area="A-05" class="totals">
+              <legend>金額集計</legend>
+              <dl>
+                <div><dt>小計<a class="spec-badge" href="#ITM-13">ITM-13</a></dt><dd id="f-subtotal">0</dd></div>
+                <div><dt>消費税（10%）<a class="spec-badge" href="#ITM-14">ITM-14</a></dt><dd id="f-tax">0</dd></div>
+                <div class="grand"><dt>合計金額（税込）<a class="spec-badge" href="#ITM-15">ITM-15</a></dt><dd id="f-total">0</dd></div>
+              </dl>
+            </fieldset>
+          </div>
+
+          <fieldset data-area="A-07">
+            <legend>備考</legend>
+            <div class="field">
+              <label for="f-remarks">備考<a class="spec-badge" href="#ITM-17">ITM-17</a></label>
+              <textarea id="f-remarks" name="remarks" rows="2" aria-describedby="remarks-count e-remarks"></textarea>
+              <p class="hint" id="remarks-count">0 / 200文字</p>
+              <p class="field-error" id="e-remarks"></p>
+            </div>
+          </fieldset>
+        </div>
+
+        <div id="view-confirm" hidden></div>
+        <div id="view-done" hidden></div>
+
+        <div class="scr-buttons" data-area="A-08">
+          <span class="busy" id="busy" hidden>登録処理中…</span>
+          <button type="button" id="btn-clear" class="btn-secondary">クリア</button
+          ><a class="spec-badge" href="#BTN-03">BTN-03</a>
+          <button type="button" id="btn-confirm" class="btn-primary" disabled>確認</button
+          ><a class="spec-badge" href="#BTN-04">BTN-04</a>
+          <button type="button" id="btn-back" class="btn-secondary" hidden>戻る</button>
+          <button type="button" id="btn-register" class="btn-primary" hidden>登録</button>
+          <button type="button" id="btn-new" class="btn-primary" hidden>新規受注</button>
+        </div>
+      </form>
+
+      <template id="line-template">
+        <tr>
+          <td class="no"></td>
+          <td>
+            <input class="code" maxlength="6" placeholder="P-1001" autocomplete="off" />
+            <p class="field-error"></p>
+          </td>
+          <td class="pname"></td>
+          <td>
+            <input class="qty" inputmode="numeric" maxlength="5" autocomplete="off" />
+            <p class="field-error"></p>
+          </td>
+          <td class="price num"></td>
+          <td class="amount num"></td>
+          <td><button type="button" class="btn-small del">行削除</button></td>
+        </tr>
+      </template>
+    </div>
+
+    <aside class="event-log" aria-label="イベントログ">
+      <p class="log-title">イベントログ <span>（発火したイベントと判定したルール）</span></p>
+      <ol id="event-log"></ol>
+    </aside>
+  </div>
+</div>

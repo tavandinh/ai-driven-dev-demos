@@ -1,0 +1,11 @@
+{
+  "name": "ai-driven-dev-demos",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "playwright test -c article-01/demo/playwright.config.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  }
+}

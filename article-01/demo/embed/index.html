@@ -1,0 +1,1069 @@
+<!doctype html>
+<html lang="ja" class="embed">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>受注登録画面 画面設計書（SCR-ORD-001）埋め込み版</title>
+    <style>
+      :root {
+        --ink: #1d2733;
+        --muted: #5b6776;
+        --line: #d5dbe3;
+        --bg: #f6f8fa;
+        --paper: #ffffff;
+        --accent: #1f4e79;
+        --accent-soft: #e6eef7;
+        --error: #b42318;
+        --error-soft: #fdecea;
+        --ok: #1a7f37;
+        --ok-soft: #e7f5ec;
+        --mark: #fff4c2;
+        font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", Meiryo, system-ui, sans-serif;
+        color: var(--ink);
+        line-height: 1.6;
+      }
+      * { box-sizing: border-box; }
+      [hidden] { display: none !important; }
+      body { margin: 0; background: var(--bg); font-size: 14px; }
+      a { color: var(--accent); }
+      code, .id { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 0.92em; }
+      .doc-header { background: var(--accent); color: #fff; padding: 20px 16px; }
+      .doc-header .system { margin: 0; opacity: 0.85; font-size: 13px; }
+      .doc-header h1 { margin: 4px 0 8px; font-size: 22px; line-height: 1.3; }
+      .doc-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+      .doc-meta li { background: rgba(255, 255, 255, 0.16); border-radius: 4px; padding: 2px 8px; font-size: 12px; }
+      .disclaimer { margin: 10px 0 0; font-size: 12px; opacity: 0.9; }
+      .layout { display: grid; grid-template-columns: minmax(0, 1fr); max-width: 1440px; margin: 0 auto; }
+      nav.toc { background: var(--paper); border-bottom: 1px solid var(--line); padding: 8px 16px; }
+      nav.toc ol { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0; padding: 0; list-style: none; font-size: 13px; }
+      main { padding: 16px; min-width: 0; }
+      section { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 16px; margin-bottom: 16px; scroll-margin-top: 12px; }
+      h2 { font-size: 18px; margin: 0 0 12px; padding-left: 10px; border-left: 4px solid var(--accent); }
+      h3 { font-size: 15px; margin: 16px 0 8px; }
+      .table-wrap { overflow-x: auto; }
+      table { border-collapse: collapse; width: 100%; font-size: 13px; }
+      th, td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
+      thead th { background: var(--accent-soft); white-space: nowrap; }
+      tbody tr:nth-child(even) { background: #fafbfc; }
+      tbody tr:target { background: var(--mark); outline: 2px solid #e0b100; }
+      tbody th { font-weight: normal; white-space: nowrap; }
+      td ol { margin: 0; padding-left: 1.3em; }
+      #tbl-items td:nth-child(2), #tbl-items td:nth-child(8) { white-space: nowrap; }
+      @media (min-width: 1100px) {
+        .layout { grid-template-columns: 220px minmax(0, 1fr); }
+        nav.toc { border: 0; background: none; padding: 16px 0 16px 16px; }
+        nav.toc ol { position: sticky; top: 16px; flex-direction: column; background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; gap: 6px; }
+      }
+
+      /* ---------- screen preview ---------- */
+      .preview { margin: 0 0 8px; }
+      .review-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 8px 12px; border: 1px dashed #b0b9c4; border-radius: 8px; background: #fbfcfd; font-size: 12px; margin-bottom: 12px; }
+      .review-tag { background: #eef1f4; color: var(--muted); border-radius: 4px; padding: 1px 6px; }
+      .review-bar .check { display: inline-flex; align-items: center; gap: 4px; }
+      .sample-group { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+      .review-bar button, .review-bar select { font: inherit; padding: 2px 8px; width: auto; }
+      .review-bar input[type="checkbox"] { width: auto; margin: 0; }
+      .review-bar label { white-space: nowrap; }
+      .state-indicator output { font-weight: bold; color: var(--accent); }
+      .preview-body { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); }
+      @media (min-width: 1360px) { .preview-body { grid-template-columns: minmax(0, 1fr) 260px; } }
+      .screen { border: 1px solid #aeb8c4; border-radius: 10px; background: #fff; box-shadow: 0 2px 8px rgba(16, 24, 40, 0.08); overflow: hidden; }
+      .scr-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 12px; background: #2b3a4a; color: #fff; padding: 8px 14px; }
+      .scr-header p { margin: 0; }
+      .scr-title { font-weight: bold; font-size: 15px; }
+      .scr-user { font-size: 12px; }
+      .scr-messages { margin: 12px 14px 0; padding: 10px 12px; border-radius: 6px; font-size: 13px; }
+      .scr-messages.error { background: var(--error-soft); border: 1px solid #f1b5ae; color: var(--error); }
+      .scr-messages.info { background: var(--ok-soft); border: 1px solid #a8d8b9; color: var(--ok); }
+      .scr-messages p { margin: 0; font-weight: bold; }
+      .scr-messages ul { margin: 6px 0 0; padding-left: 1.2em; }
+      .scr-messages a { color: inherit; }
+      form { padding: 12px 14px 14px; }
+      fieldset { border: 1px solid var(--line); border-radius: 8px; margin: 0 0 12px; padding: 8px 12px 10px; min-width: 0; }
+      legend { font-weight: bold; padding: 0 4px; font-size: 13px; }
+      .grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px 16px; }
+      @media (min-width: 640px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      .row-2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 12px; }
+      @media (min-width: 640px) { .row-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      .field label, .field .label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 2px; }
+      .req { display: inline-block; margin-left: 6px; font-size: 10px; line-height: 1.4; background: var(--error); color: #fff; border-radius: 3px; padding: 0 4px; vertical-align: 1px; }
+      input, select, textarea { font: inherit; width: 100%; padding: 6px 8px; border: 1px solid #9aa5b1; border-radius: 4px; background: #fff; }
+      input:focus, select:focus, textarea:focus, button:focus-visible { outline: 2px solid #4c8bd6; outline-offset: 1px; }
+      [aria-invalid="true"] { border-color: var(--error); background: var(--error-soft); }
+      .readonly { display: block; min-height: 34px; padding: 6px 8px; border-radius: 4px; background: #eef1f4; }
+      .field-error { margin: 2px 0 0; color: var(--error); font-size: 12px; min-height: 0; }
+      .field-error:empty { display: none; }
+      .field-error .rule-ref { color: var(--muted); font-size: 11px; margin-left: 4px; }
+      .hint { margin: 2px 0 0; color: var(--muted); font-size: 11px; }
+      .lines-wrap, .table-wrap { overflow-x: auto; position: relative; }
+      table.lines { min-width: 600px; font-size: 13px; }
+      table.lines th, table.lines td { border-color: #e3e8ee; padding: 4px 6px; vertical-align: top; }
+      table.lines td.no { width: 36px; text-align: center; padding-top: 10px; }
+      table.lines input.code { width: 96px; }
+      table.lines input.qty { width: 72px; text-align: right; }
+      .num { text-align: right; white-space: nowrap; padding-top: 10px !important; }
+      .pname { padding-top: 10px !important; }
+      .totals dl { margin: 0; }
+      .totals dl div { display: flex; justify-content: space-between; gap: 8px; padding: 3px 0; border-bottom: 1px dotted var(--line); }
+      .totals dt { font-size: 12px; }
+      .totals dd { margin: 0; font-variant-numeric: tabular-nums; }
+      .totals .grand dd { font-weight: bold; font-size: 16px; }
+      button { font: inherit; cursor: pointer; white-space: nowrap; }
+      button:disabled { cursor: not-allowed; opacity: 0.45; }
+      .btn-primary, .btn-secondary { padding: 7px 18px; border-radius: 6px; border: 1px solid var(--accent); }
+      .btn-primary { background: var(--accent); color: #fff; }
+      .btn-secondary { background: #fff; color: var(--accent); }
+      .btn-small { padding: 3px 10px; border-radius: 4px; border: 1px solid #9aa5b1; background: #fff; font-size: 12px; margin-top: 6px; }
+      .scr-buttons { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px; padding-top: 4px; }
+      .busy { color: var(--accent); font-weight: bold; }
+      .confirm-note { margin: 0 0 10px; padding: 8px 10px; border-radius: 6px; background: var(--accent-soft); font-size: 13px; }
+      .confirm-note.approval { background: var(--mark); }
+      .confirm-list { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 16px; margin: 0 0 12px; font-size: 13px; }
+      .confirm-list dt { color: var(--muted); }
+      .confirm-list dd { margin: 0; overflow-wrap: anywhere; }
+      .done { text-align: center; padding: 20px 8px; }
+      .done .order-no { font-size: 20px; font-weight: bold; letter-spacing: 0.04em; }
+      .event-log { border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; background: #fbfcfd; font-size: 12px; align-self: start; }
+      .log-title { margin: 0 0 4px; font-weight: bold; }
+      .log-title span { font-weight: normal; color: var(--muted); }
+      .event-log ol { margin: 0; padding-left: 1.4em; max-height: 360px; overflow-y: auto; }
+      .event-log li { padding: 1px 0; }
+      .event-log li.ng { color: var(--error); }
+      .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+      /* Spec ID overlay: 項目IDと領域を表示 */
+      .spec-badge { display: none; }
+      .show-ids .spec-badge { display: inline-block; margin-left: 4px; padding: 0 4px; border-radius: 3px; background: #6b3fa0; color: #fff; font: 10px/1.5 ui-monospace, Consolas, monospace; text-decoration: none; vertical-align: 1px; }
+      .show-ids [data-area] { position: relative; outline: 2px dashed #6b3fa0; outline-offset: -2px; }
+      .show-ids [data-area]::after { content: attr(data-area); position: absolute; top: 0; right: 0; background: #6b3fa0; color: #fff; font: 10px/1.6 ui-monospace, Consolas, monospace; padding: 0 5px; border-bottom-left-radius: 4px; }
+      footer { text-align: center; color: var(--muted); font-size: 12px; padding: 8px 16px 24px; }
+      @media print {
+        body { background: #fff; }
+        .review-bar, .event-log, nav.toc { display: none; }
+        .layout { display: block; }
+        section { break-inside: avoid-page; border: 0; padding: 0; }
+      }
+
+      /* ---- embed view (build_embed.py) ---- */
+      .embed .doc-header, .embed nav.toc { display: none; }
+      .embed .layout { display: block; }
+      .embed main { display: flex; flex-direction: column; padding: 8px; }
+      .embed main > section { min-width: 0; }
+      .embed #layout { order: -1; padding: 8px; }
+      .embed #h-layout { display: none; }
+      .embed-intro { background: var(--accent); color: #fff; padding: 6px 12px; font-size: 13px; line-height: 1.5; }
+      .embed-intro p { margin: 0; }
+      .embed-intro .embed-note { opacity: 0.85; font-size: 11px; }
+    </style>
+  </head>
+  <body>
+<div class="embed-intro">
+  <p>「高額（承認あり）」を押すか、数量を変えて合計（税込）を 1,000,000 円以上にしてみてください。承認者が必須になり、選ぶまで［確認］は押せません（BR-002）。</p>
+  <p class="embed-note">受注登録画面 画面設計書（SCR-ORD-001）の画面プレビュー。下に仕様書の表が続きます（ID をクリックで移動）。本書は技術記事のために作成した架空の業務仕様であり、実在のシステムや企業の仕様ではない。</p>
+</div>
+    <header class="doc-header">
+      <p class="system">販売管理システム（デモ）</p>
+      <h1>受注登録画面 画面設計書</h1>
+      <ul class="doc-meta">
+        <li>画面ID：<span class="id">SCR-ORD-001</span></li>
+        <li>版数：1.0</li>
+        <li>更新日：2026-11-25</li>
+      </ul>
+      <p class="disclaimer">本書は技術記事のために作成した架空の業務仕様であり、実在のシステムや企業の仕様ではない。</p>
+    </header>
+    <div class="layout">
+      <nav class="toc" aria-label="目次">
+        <ol>
+          <li><a href="#overview">1. 概要</a></li>
+          <li><a href="#revisions">2. 改訂履歴</a></li>
+          <li><a href="#layout">3. 画面レイアウト</a></li>
+          <li><a href="#items">4. 項目定義</a></li>
+          <li><a href="#events">5. イベント定義</a></li>
+          <li><a href="#validations">6. 入力チェック</a></li>
+          <li><a href="#rules">7. 業務ルール</a></li>
+          <li><a href="#messages">8. メッセージ</a></li>
+          <li><a href="#states">9. 画面状態</a></li>
+          <li><a href="#testdata">10. テストデータ</a></li>
+        </ol>
+      </nav>
+      <main>
+<section id="overview" aria-labelledby="h-overview">
+<h2 id="h-overview">1. 概要</h2>
+<div class="table-wrap"><table id="tbl-overview">
+<thead><tr><th scope="col">項目</th><th scope="col">内容</th></tr></thead>
+<tbody>
+<tr><td>システム名</td><td>販売管理システム（デモ）</td></tr>
+<tr><td>画面ID</td><td>SCR-ORD-001</td></tr>
+<tr><td>画面名</td><td>受注登録画面</td></tr>
+<tr><td>版数</td><td>1.0</td></tr>
+<tr><td>更新日</td><td>2026-11-25</td></tr>
+<tr><td>作成者</td><td>TechU Solutions（記事用デモ）</td></tr>
+<tr><td>目的</td><td>営業担当者が顧客からの注文（受注）を登録する。合計金額が一定額以上の受注は、営業マネージャーの承認に回す。</td></tr>
+<tr><td>利用者</td><td>営業担当者、営業マネージャー</td></tr>
+<tr><td>遷移元</td><td>メニュー「受注」→「受注登録」</td></tr>
+<tr><td>凡例</td><td>必須：○＝必須、△＝条件付き必須、空欄＝任意または対象外。チェックタイミング：F＝フォーカスアウト時（選択項目は変更時）、C＝確認ボタン押下時。</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section id="revisions" aria-labelledby="h-revisions">
+<h2 id="h-revisions">2. 改訂履歴</h2>
+<div class="table-wrap"><table id="tbl-revisions">
+<thead><tr><th scope="col">版数</th><th scope="col">日付</th><th scope="col">作成者</th><th scope="col">内容</th></tr></thead>
+<tbody>
+<tr><td>1.0</td><td>2026-11-25</td><td>TechU</td><td>初版作成</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section id="layout" aria-labelledby="h-layout">
+<h2 id="h-layout">3. 画面レイアウト</h2>
+<div class="preview" id="preview">
+  <div class="review-bar" role="group" aria-label="レビュー用操作（仕様外）">
+    <span class="review-tag">レビュー用操作（仕様外）</span>
+    <label
+      >ログインユーザー
+      <select id="demo-user">
+        <option value="U001">山田 太郎（U001）</option>
+        <option value="U101">佐藤 花子（U101）</option>
+      </select>
+    </label>
+    <label class="check"><input type="checkbox" id="demo-ids" /> 項目IDと領域を表示</label>
+    <span class="sample-group"
+      >サンプル入力
+      <button type="button" data-sample="normal">通常</button>
+      <button type="button" data-sample="approval">高額（承認あり）</button>
+      <button type="button" data-sample="error">エラー</button>
+    </span>
+    <span class="state-indicator">画面状態：<output id="demo-state">ST-01 初期表示</output></span>
+  </div>
+
+  <div class="preview-body">
+    <div class="screen" id="screen" data-state="ST-01">
+      <header class="scr-header" data-area="A-01">
+        <p class="scr-title">受注登録</p>
+        <p class="scr-user">
+          <a class="spec-badge" href="#ITM-01">ITM-01</a><span id="f-user">山田 太郎（U001）</span>
+        </p>
+      </header>
+
+      <div class="scr-messages" id="scr-messages" data-area="A-02" aria-live="polite" hidden></div>
+
+      <form id="order-form" novalidate>
+        <div id="view-input">
+          <fieldset data-area="A-03">
+            <legend>受注基本情報</legend>
+            <div class="grid">
+              <div class="field">
+                <span class="label">受注番号<a class="spec-badge" href="#ITM-02">ITM-02</a></span>
+                <output id="f-orderNo" class="readonly">（登録時に採番）</output>
+              </div>
+              <div class="field">
+                <label for="f-orderDate"
+                  >受注日<span class="req">必須</span><a class="spec-badge" href="#ITM-03">ITM-03</a></label
+                >
+                <input id="f-orderDate" name="orderDate" inputmode="numeric" placeholder="YYYY-MM-DD" maxlength="10" autocomplete="off" aria-describedby="e-orderDate" />
+                <p class="field-error" id="e-orderDate"></p>
+              </div>
+              <div class="field">
+                <label for="f-customer"
+                  >顧客コード<span class="req">必須</span><a class="spec-badge" href="#ITM-04">ITM-04</a></label
+                >
+                <input id="f-customer" name="customer" placeholder="例：C00001" maxlength="6" autocomplete="off" aria-describedby="e-customer" />
+                <p class="field-error" id="e-customer"></p>
+              </div>
+              <div class="field">
+                <span class="label">顧客名<a class="spec-badge" href="#ITM-05">ITM-05</a></span>
+                <output id="f-customerName" class="readonly"></output>
+              </div>
+              <div class="field">
+                <label for="f-delivery"
+                  >希望納期<span class="req">必須</span><a class="spec-badge" href="#ITM-06">ITM-06</a></label
+                >
+                <input id="f-delivery" name="delivery" inputmode="numeric" placeholder="YYYY-MM-DD" maxlength="10" autocomplete="off" aria-describedby="e-delivery" />
+                <p class="field-error" id="e-delivery"></p>
+              </div>
+              <div class="field">
+                <label for="f-payment"
+                  >支払条件<span class="req">必須</span><a class="spec-badge" href="#ITM-07">ITM-07</a></label
+                >
+                <select id="f-payment" name="payment" aria-describedby="e-payment">
+                  <option value="">選択してください</option>
+                  <option value="01">01：月末締め翌月末払い</option>
+                  <option value="02">02：前払い</option>
+                  <option value="03">03：代金引換</option>
+                </select>
+                <p class="field-error" id="e-payment"></p>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset data-area="A-04">
+            <legend>受注明細</legend>
+            <div class="lines-wrap">
+              <table class="lines">
+                <thead>
+                  <tr>
+                    <th scope="col">No</th>
+                    <th scope="col">商品コード<span class="req">必須</span><a class="spec-badge" href="#ITM-08">ITM-08</a></th>
+                    <th scope="col">商品名<a class="spec-badge" href="#ITM-09">ITM-09</a></th>
+                    <th scope="col">数量<span class="req">必須</span><a class="spec-badge" href="#ITM-10">ITM-10</a></th>
+                    <th scope="col">単価<a class="spec-badge" href="#ITM-11">ITM-11</a></th>
+                    <th scope="col">金額<a class="spec-badge" href="#ITM-12">ITM-12</a></th>
+                    <th scope="col"><span class="visually-hidden">操作</span><a class="spec-badge" href="#BTN-02">BTN-02</a></th>
+                  </tr>
+                </thead>
+                <tbody id="lines"></tbody>
+              </table>
+            </div>
+            <button type="button" id="btn-addLine" class="btn-small">＋ 行追加</button><a class="spec-badge" href="#BTN-01">BTN-01</a>
+          </fieldset>
+
+          <div class="row-2">
+            <fieldset data-area="A-06">
+              <legend>承認情報</legend>
+              <div class="field">
+                <label for="f-approver"
+                  >承認者<span class="req" id="approver-req" hidden>必須</span><a class="spec-badge" href="#ITM-16">ITM-16</a></label
+                >
+                <select id="f-approver" name="approver" aria-describedby="approver-hint e-approver">
+                  <option value="">選択してください</option>
+                </select>
+                <p class="hint" id="approver-hint">合計金額（税込）1,000,000円以上の場合に必須</p>
+                <p class="field-error" id="e-approver"></p>
+              </div>
+            </fieldset>
+            <fieldset data-area="A-05" class="totals">
+              <legend>金額集計</legend>
+              <dl>
+                <div><dt>小計<a class="spec-badge" href="#ITM-13">ITM-13</a></dt><dd id="f-subtotal">0</dd></div>
+                <div><dt>消費税（10%）<a class="spec-badge" href="#ITM-14">ITM-14</a></dt><dd id="f-tax">0</dd></div>
+                <div class="grand"><dt>合計金額（税込）<a class="spec-badge" href="#ITM-15">ITM-15</a></dt><dd id="f-total">0</dd></div>
+              </dl>
+            </fieldset>
+          </div>
+
+          <fieldset data-area="A-07">
+            <legend>備考</legend>
+            <div class="field">
+              <label for="f-remarks">備考<a class="spec-badge" href="#ITM-17">ITM-17</a></label>
+              <textarea id="f-remarks" name="remarks" rows="2" aria-describedby="remarks-count e-remarks"></textarea>
+              <p class="hint" id="remarks-count">0 / 200文字</p>
+              <p class="field-error" id="e-remarks"></p>
+            </div>
+          </fieldset>
+        </div>
+
+        <div id="view-confirm" hidden></div>
+        <div id="view-done" hidden></div>
+
+        <div class="scr-buttons" data-area="A-08">
+          <span class="busy" id="busy" hidden>登録処理中…</span>
+          <button type="button" id="btn-clear" class="btn-secondary">クリア</button
+          ><a class="spec-badge" href="#BTN-03">BTN-03</a>
+          <button type="button" id="btn-confirm" class="btn-primary" disabled>確認</button
+          ><a class="spec-badge" href="#BTN-04">BTN-04</a>
+          <button type="button" id="btn-back" class="btn-secondary" hidden>戻る</button>
+          <button type="button" id="btn-register" class="btn-primary" hidden>登録</button>
+          <button type="button" id="btn-new" class="btn-primary" hidden>新規受注</button>
+        </div>
+      </form>
+
+      <template id="line-template">
+        <tr>
+          <td class="no"></td>
+          <td>
+            <input class="code" maxlength="6" placeholder="P-1001" autocomplete="off" />
+            <p class="field-error"></p>
+          </td>
+          <td class="pname"></td>
+          <td>
+            <input class="qty" inputmode="numeric" maxlength="5" autocomplete="off" />
+            <p class="field-error"></p>
+          </td>
+          <td class="price num"></td>
+          <td class="amount num"></td>
+          <td><button type="button" class="btn-small del">行削除</button></td>
+        </tr>
+      </template>
+    </div>
+
+    <aside class="event-log" aria-label="イベントログ">
+      <p class="log-title">イベントログ <span>（発火したイベントと判定したルール）</span></p>
+      <ol id="event-log"></ol>
+    </aside>
+  </div>
+</div>
+<h3>領域一覧</h3>
+<div class="table-wrap"><table id="tbl-layout">
+<thead><tr><th scope="col">領域ID</th><th scope="col">領域名</th><th scope="col">配置</th><th scope="col">含まれる項目</th><th scope="col">説明</th></tr></thead>
+<tbody>
+<tr id="A-01"><th scope="row">A-01</th><td>ヘッダー</td><td>上部・全幅</td><td><a href="#ITM-01">ITM-01</a></td><td>画面タイトルとログインユーザーを表示する。</td></tr>
+<tr id="A-02"><th scope="row">A-02</th><td>メッセージ</td><td>ヘッダー直下・全幅</td><td>—</td><td>エラー件数とエラー一覧、登録完了メッセージを表示する。通常時は非表示。</td></tr>
+<tr id="A-03"><th scope="row">A-03</th><td>受注基本情報</td><td>上段</td><td><a href="#ITM-02">ITM-02</a>〜<a href="#ITM-07">ITM-07</a></td><td>受注番号、受注日、顧客、希望納期、支払条件を入力する。</td></tr>
+<tr id="A-04"><th scope="row">A-04</th><td>受注明細</td><td>中段</td><td><a href="#ITM-08">ITM-08</a>〜<a href="#ITM-12">ITM-12</a>、<a href="#BTN-01">BTN-01</a>、<a href="#BTN-02">BTN-02</a></td><td>商品明細を1〜5行入力する。</td></tr>
+<tr id="A-05"><th scope="row">A-05</th><td>金額集計</td><td>中段・右寄せ</td><td><a href="#ITM-13">ITM-13</a>〜<a href="#ITM-15">ITM-15</a></td><td>小計、消費税、合計金額（税込）を自動計算して表示する。</td></tr>
+<tr id="A-06"><th scope="row">A-06</th><td>承認情報</td><td>下段</td><td><a href="#ITM-16">ITM-16</a></td><td>承認者を選択する。<a href="#BR-002">BR-002</a> に該当する場合のみ必須。</td></tr>
+<tr id="A-07"><th scope="row">A-07</th><td>備考</td><td>下段</td><td><a href="#ITM-17">ITM-17</a></td><td>受注に関する補足を入力する。</td></tr>
+<tr id="A-08"><th scope="row">A-08</th><td>ボタン</td><td>最下部・右寄せ</td><td><a href="#BTN-03">BTN-03</a>〜<a href="#BTN-07">BTN-07</a></td><td>画面状態に応じたボタンを表示する。</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section id="items" aria-labelledby="h-items">
+<h2 id="h-items">4. 項目定義</h2>
+<div class="table-wrap"><table id="tbl-items">
+<thead><tr><th scope="col">No</th><th scope="col">項目ID</th><th scope="col">領域</th><th scope="col">項目名</th><th scope="col">入出力</th><th scope="col">型</th><th scope="col">桁数</th><th scope="col">必須</th><th scope="col">初期値</th><th scope="col">形式・制約</th><th scope="col">関連</th></tr></thead>
+<tbody>
+<tr id="ITM-01"><th scope="row">1</th><td>ITM-01</td><td><a href="#A-01">A-01</a></td><td>ログインユーザー</td><td>表示</td><td>文字列</td><td>30</td><td></td><td>ログイン中の社員</td><td>「氏名（社員コード）」で表示</td><td><a href="#BR-003">BR-003</a></td></tr>
+<tr id="ITM-02"><th scope="row">2</th><td>ITM-02</td><td><a href="#A-03">A-03</a></td><td>受注番号</td><td>表示</td><td>文字列</td><td>17</td><td></td><td>空欄</td><td>登録完了時に採番（ORD-YYYYMMDD-NNNN）</td><td><a href="#EV-11">EV-11</a></td></tr>
+<tr id="ITM-03"><th scope="row">3</th><td>ITM-03</td><td><a href="#A-03">A-03</a></td><td>受注日</td><td>入力</td><td>日付</td><td>10</td><td>○</td><td>システム日付</td><td>YYYY-MM-DD</td><td><a href="#VR-01">VR-01</a>, <a href="#VR-02">VR-02</a></td></tr>
+<tr id="ITM-04"><th scope="row">4</th><td>ITM-04</td><td><a href="#A-03">A-03</a></td><td>顧客コード</td><td>入力</td><td>文字列</td><td>6</td><td>○</td><td>空欄</td><td>「C」＋数字5桁（例：C00001）</td><td><a href="#VR-03">VR-03</a>〜<a href="#VR-06">VR-06</a>, <a href="#BR-007">BR-007</a>, <a href="#EV-02">EV-02</a></td></tr>
+<tr id="ITM-05"><th scope="row">5</th><td>ITM-05</td><td><a href="#A-03">A-03</a></td><td>顧客名</td><td>表示</td><td>文字列</td><td>50</td><td></td><td>空欄</td><td>顧客コード確定時に顧客マスタから表示</td><td><a href="#EV-02">EV-02</a></td></tr>
+<tr id="ITM-06"><th scope="row">6</th><td>ITM-06</td><td><a href="#A-03">A-03</a></td><td>希望納期</td><td>入力</td><td>日付</td><td>10</td><td>○</td><td>空欄</td><td>YYYY-MM-DD</td><td><a href="#VR-07">VR-07</a>〜<a href="#VR-09">VR-09</a>, <a href="#BR-005">BR-005</a></td></tr>
+<tr id="ITM-07"><th scope="row">7</th><td>ITM-07</td><td><a href="#A-03">A-03</a></td><td>支払条件</td><td>選択</td><td>コード</td><td>2</td><td>○</td><td>未選択</td><td>01：月末締め翌月末払い／02：前払い／03：代金引換</td><td><a href="#VR-10">VR-10</a></td></tr>
+<tr id="ITM-08"><th scope="row">8</th><td>ITM-08</td><td><a href="#A-04">A-04</a></td><td>商品コード</td><td>入力</td><td>文字列</td><td>6</td><td>○</td><td>空欄</td><td>「P-」＋数字4桁（例：P-1001）。明細行ごと</td><td><a href="#VR-11">VR-11</a>〜<a href="#VR-13">VR-13</a>, <a href="#EV-03">EV-03</a></td></tr>
+<tr id="ITM-09"><th scope="row">9</th><td>ITM-09</td><td><a href="#A-04">A-04</a></td><td>商品名</td><td>表示</td><td>文字列</td><td>50</td><td></td><td>空欄</td><td>商品コード確定時に商品マスタから表示</td><td><a href="#EV-03">EV-03</a></td></tr>
+<tr id="ITM-10"><th scope="row">10</th><td>ITM-10</td><td><a href="#A-04">A-04</a></td><td>数量</td><td>入力</td><td>数値</td><td>4</td><td>○</td><td>1</td><td>整数 1〜9,999</td><td><a href="#VR-14">VR-14</a>, <a href="#VR-15">VR-15</a>, <a href="#EV-04">EV-04</a></td></tr>
+<tr id="ITM-11"><th scope="row">11</th><td>ITM-11</td><td><a href="#A-04">A-04</a></td><td>単価</td><td>表示</td><td>数値（円）</td><td>9</td><td></td><td>空欄</td><td>商品マスタの単価。画面では変更不可</td><td><a href="#BR-008">BR-008</a></td></tr>
+<tr id="ITM-12"><th scope="row">12</th><td>ITM-12</td><td><a href="#A-04">A-04</a></td><td>金額</td><td>表示</td><td>数値（円）</td><td>10</td><td></td><td>空欄</td><td>数量 × 単価</td><td><a href="#EV-04">EV-04</a></td></tr>
+<tr id="ITM-13"><th scope="row">13</th><td>ITM-13</td><td><a href="#A-05">A-05</a></td><td>小計</td><td>表示</td><td>数値（円）</td><td>11</td><td></td><td>0</td><td>明細金額の合計</td><td><a href="#BR-006">BR-006</a></td></tr>
+<tr id="ITM-14"><th scope="row">14</th><td>ITM-14</td><td><a href="#A-05">A-05</a></td><td>消費税</td><td>表示</td><td>数値（円）</td><td>11</td><td></td><td>0</td><td>小計 × 10%（1円未満切り捨て）</td><td><a href="#BR-006">BR-006</a></td></tr>
+<tr id="ITM-15"><th scope="row">15</th><td>ITM-15</td><td><a href="#A-05">A-05</a></td><td>合計金額（税込）</td><td>表示</td><td>数値（円）</td><td>11</td><td></td><td>0</td><td>小計 ＋ 消費税</td><td><a href="#BR-001">BR-001</a>, <a href="#BR-002">BR-002</a>, <a href="#VR-19">VR-19</a></td></tr>
+<tr id="ITM-16"><th scope="row">16</th><td>ITM-16</td><td><a href="#A-06">A-06</a></td><td>承認者</td><td>選択</td><td>社員コード</td><td>4</td><td>△</td><td>未選択</td><td>営業マネージャーから選択（テストデータ参照）</td><td><a href="#VR-16">VR-16</a>, <a href="#VR-17">VR-17</a>, <a href="#BR-002">BR-002</a>, <a href="#BR-003">BR-003</a></td></tr>
+<tr id="ITM-17"><th scope="row">17</th><td>ITM-17</td><td><a href="#A-07">A-07</a></td><td>備考</td><td>入力</td><td>文字列</td><td>200</td><td></td><td>空欄</td><td>200文字以内</td><td><a href="#VR-18">VR-18</a></td></tr>
+<tr id="BTN-01"><th scope="row">18</th><td>BTN-01</td><td><a href="#A-04">A-04</a></td><td>行追加</td><td>ボタン</td><td>—</td><td>—</td><td></td><td>活性</td><td>明細が5行のとき非活性</td><td><a href="#EV-05">EV-05</a></td></tr>
+<tr id="BTN-02"><th scope="row">19</th><td>BTN-02</td><td><a href="#A-04">A-04</a></td><td>行削除</td><td>ボタン</td><td>—</td><td>—</td><td></td><td>非活性</td><td>明細行ごとに表示。明細が1行のとき非活性</td><td><a href="#EV-06">EV-06</a></td></tr>
+<tr id="BTN-03"><th scope="row">20</th><td>BTN-03</td><td><a href="#A-08">A-08</a></td><td>クリア</td><td>ボタン</td><td>—</td><td>—</td><td></td><td>活性</td><td>入力画面（<a href="#ST-01">ST-01</a>〜<a href="#ST-03">ST-03</a>）で表示</td><td><a href="#EV-10">EV-10</a></td></tr>
+<tr id="BTN-04"><th scope="row">21</th><td>BTN-04</td><td><a href="#A-08">A-08</a></td><td>確認</td><td>ボタン</td><td>—</td><td>—</td><td></td><td>非活性</td><td>入力画面で表示。活性条件は <a href="#BR-004">BR-004</a></td><td><a href="#BR-004">BR-004</a>, <a href="#EV-08">EV-08</a></td></tr>
+<tr id="BTN-05"><th scope="row">22</th><td>BTN-05</td><td><a href="#A-08">A-08</a></td><td>戻る</td><td>ボタン</td><td>—</td><td>—</td><td></td><td>—</td><td>確認画面（<a href="#ST-04">ST-04</a>）でのみ表示</td><td><a href="#EV-09">EV-09</a></td></tr>
+<tr id="BTN-06"><th scope="row">23</th><td>BTN-06</td><td><a href="#A-08">A-08</a></td><td>登録</td><td>ボタン</td><td>—</td><td>—</td><td></td><td>—</td><td>確認画面（<a href="#ST-04">ST-04</a>）でのみ表示</td><td><a href="#EV-11">EV-11</a></td></tr>
+<tr id="BTN-07"><th scope="row">24</th><td>BTN-07</td><td><a href="#A-08">A-08</a></td><td>新規受注</td><td>ボタン</td><td>—</td><td>—</td><td></td><td>—</td><td>登録完了（<a href="#ST-06">ST-06</a>）でのみ表示</td><td><a href="#EV-12">EV-12</a></td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section id="events" aria-labelledby="h-events">
+<h2 id="h-events">5. イベント定義</h2>
+<div class="table-wrap"><table id="tbl-events">
+<thead><tr><th scope="col">イベントID</th><th scope="col">イベント名</th><th scope="col">契機</th><th scope="col">条件</th><th scope="col">処理内容</th><th scope="col">遷移先</th></tr></thead>
+<tbody>
+<tr id="EV-01"><th scope="row">EV-01</th><td>画面初期表示</td><td>画面表示時</td><td>—</td><td><ol><li>受注日にシステム日付、明細1行目の数量に1を設定する。</li><li>確認ボタンと行削除ボタンを非活性にする。</li></ol></td><td><a href="#ST-01">ST-01</a></td></tr>
+<tr id="EV-02"><th scope="row">EV-02</th><td>顧客コード確定</td><td><a href="#ITM-04">ITM-04</a> フォーカスアウト</td><td>入力値あり</td><td><ol><li><a href="#VR-04">VR-04</a>、<a href="#VR-05">VR-05</a>、<a href="#VR-06">VR-06</a> を実行する。</li><li>OK の場合、顧客マスタの顧客名を <a href="#ITM-05">ITM-05</a> に表示する。</li><li>NG の場合、<a href="#ITM-05">ITM-05</a> を空欄にしてエラーを表示する。</li></ol></td><td><a href="#ST-02">ST-02</a> または <a href="#ST-03">ST-03</a></td></tr>
+<tr id="EV-03"><th scope="row">EV-03</th><td>商品コード確定</td><td><a href="#ITM-08">ITM-08</a> フォーカスアウト</td><td>入力値あり</td><td><ol><li><a href="#VR-12">VR-12</a>、<a href="#VR-13">VR-13</a> を実行する。</li><li>OK の場合、商品名（<a href="#ITM-09">ITM-09</a>）と単価（<a href="#ITM-11">ITM-11</a>）を表示し、金額と集計を再計算する。</li></ol></td><td><a href="#ST-02">ST-02</a> または <a href="#ST-03">ST-03</a></td></tr>
+<tr id="EV-04"><th scope="row">EV-04</th><td>数量変更</td><td><a href="#ITM-10">ITM-10</a> フォーカスアウト</td><td>—</td><td><ol><li><a href="#VR-14">VR-14</a>、<a href="#VR-15">VR-15</a> を実行する。</li><li>OK の場合、金額（<a href="#ITM-12">ITM-12</a>）と集計（<a href="#ITM-13">ITM-13</a>〜<a href="#ITM-15">ITM-15</a>）を再計算する（<a href="#BR-006">BR-006</a>）。</li><li><a href="#BR-002">BR-002</a> を判定し、承認者の必須表示を切り替える。</li></ol></td><td><a href="#ST-02">ST-02</a> または <a href="#ST-03">ST-03</a></td></tr>
+<tr id="EV-05"><th scope="row">EV-05</th><td>行追加</td><td><a href="#BTN-01">BTN-01</a> 押下</td><td>明細が5行未満</td><td><ol><li>明細の末尾に空の行を追加する（数量の初期値は1）。</li></ol></td><td><a href="#ST-02">ST-02</a></td></tr>
+<tr id="EV-06"><th scope="row">EV-06</th><td>行削除</td><td><a href="#BTN-02">BTN-02</a> 押下</td><td>明細が2行以上</td><td><ol><li>対象行を削除し、集計を再計算する。</li></ol></td><td><a href="#ST-02">ST-02</a></td></tr>
+<tr id="EV-07"><th scope="row">EV-07</th><td>承認者変更</td><td><a href="#ITM-16">ITM-16</a> 変更</td><td>—</td><td><ol><li><a href="#VR-16">VR-16</a>、<a href="#VR-17">VR-17</a> を実行する。</li></ol></td><td><a href="#ST-02">ST-02</a> または <a href="#ST-03">ST-03</a></td></tr>
+<tr id="EV-08"><th scope="row">EV-08</th><td>確認</td><td><a href="#BTN-04">BTN-04</a> 押下</td><td><a href="#BR-004">BR-004</a> の活性条件を満たす</td><td><ol><li>全項目に <a href="#VR-01">VR-01</a>〜<a href="#VR-19">VR-19</a> を実行する。</li><li>エラーなしの場合、確認画面に切り替える。</li><li>エラーありの場合、<a href="#A-02">A-02</a> に <a href="#MSG-E011">MSG-E011</a> とエラー一覧を表示する。</li></ol></td><td><a href="#ST-04">ST-04</a> または <a href="#ST-03">ST-03</a></td></tr>
+<tr id="EV-09"><th scope="row">EV-09</th><td>戻る</td><td><a href="#BTN-05">BTN-05</a> 押下</td><td>—</td><td><ol><li>入力値を保持したまま入力画面に戻る。</li></ol></td><td><a href="#ST-02">ST-02</a></td></tr>
+<tr id="EV-10"><th scope="row">EV-10</th><td>クリア</td><td><a href="#BTN-03">BTN-03</a> 押下</td><td>—</td><td><ol><li><a href="#MSG-Q001">MSG-Q001</a> で確認する。</li><li>OK の場合、<a href="#EV-01">EV-01</a> と同じ初期状態に戻す。</li></ol></td><td><a href="#ST-01">ST-01</a></td></tr>
+<tr id="EV-11"><th scope="row">EV-11</th><td>登録</td><td><a href="#BTN-06">BTN-06</a> 押下</td><td>—</td><td><ol><li>二重送信防止のため、全ボタンを非活性にする（<a href="#ST-05">ST-05</a>）。</li><li>受注番号を採番して登録する。</li><li><a href="#BR-002">BR-002</a> に該当する場合はステータス「承認待ち」で登録し <a href="#MSG-I002">MSG-I002</a> を表示する。それ以外は「受注確定」で登録し <a href="#MSG-I001">MSG-I001</a> を表示する。</li></ol></td><td><a href="#ST-05">ST-05</a> → <a href="#ST-06">ST-06</a></td></tr>
+<tr id="EV-12"><th scope="row">EV-12</th><td>新規受注</td><td><a href="#BTN-07">BTN-07</a> 押下</td><td>—</td><td><ol><li><a href="#EV-01">EV-01</a> と同じ初期状態に戻す。</li></ol></td><td><a href="#ST-01">ST-01</a></td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section id="validations" aria-labelledby="h-validations">
+<h2 id="h-validations">6. 入力チェック</h2>
+<div class="table-wrap"><table id="tbl-validations">
+<thead><tr><th scope="col">チェックID</th><th scope="col">対象項目</th><th scope="col">チェック内容</th><th scope="col">エラー条件</th><th scope="col">タイミング</th><th scope="col">メッセージID</th><th scope="col">業務ルール</th></tr></thead>
+<tbody>
+<tr id="VR-01"><th scope="row">VR-01</th><td><a href="#ITM-03">ITM-03</a> 受注日</td><td>必須</td><td>未入力</td><td>F, C</td><td><a href="#MSG-E001">MSG-E001</a></td><td></td></tr>
+<tr id="VR-02"><th scope="row">VR-02</th><td><a href="#ITM-03">ITM-03</a> 受注日</td><td>日付形式</td><td>YYYY-MM-DD 形式の実在する日付でない</td><td>F, C</td><td><a href="#MSG-E002">MSG-E002</a></td><td></td></tr>
+<tr id="VR-03"><th scope="row">VR-03</th><td><a href="#ITM-04">ITM-04</a> 顧客コード</td><td>必須</td><td>未入力</td><td>F, C</td><td><a href="#MSG-E001">MSG-E001</a></td><td></td></tr>
+<tr id="VR-04" data-pattern="^C[0-9]{5}$" data-format-label="「C」＋数字5桁"><th scope="row">VR-04</th><td><a href="#ITM-04">ITM-04</a> 顧客コード</td><td>形式</td><td>正規表現 ^C[0-9]{5}$ に一致しない</td><td>F, C</td><td><a href="#MSG-E002">MSG-E002</a></td><td></td></tr>
+<tr id="VR-05"><th scope="row">VR-05</th><td><a href="#ITM-04">ITM-04</a> 顧客コード</td><td>存在</td><td>顧客マスタに存在しない</td><td>F, C</td><td><a href="#MSG-E003">MSG-E003</a></td><td></td></tr>
+<tr id="VR-06"><th scope="row">VR-06</th><td><a href="#ITM-04">ITM-04</a> 顧客コード</td><td>取引状態</td><td>顧客の取引状態が「取引停止」</td><td>F, C</td><td><a href="#MSG-E004">MSG-E004</a></td><td><a href="#BR-007">BR-007</a></td></tr>
+<tr id="VR-07"><th scope="row">VR-07</th><td><a href="#ITM-06">ITM-06</a> 希望納期</td><td>必須</td><td>未入力</td><td>F, C</td><td><a href="#MSG-E001">MSG-E001</a></td><td></td></tr>
+<tr id="VR-08"><th scope="row">VR-08</th><td><a href="#ITM-06">ITM-06</a> 希望納期</td><td>日付形式</td><td>YYYY-MM-DD 形式の実在する日付でない</td><td>F, C</td><td><a href="#MSG-E002">MSG-E002</a></td><td></td></tr>
+<tr id="VR-09"><th scope="row">VR-09</th><td><a href="#ITM-06">ITM-06</a> 希望納期</td><td>納期</td><td>受注日の翌日より前</td><td>F, C</td><td><a href="#MSG-E005">MSG-E005</a></td><td><a href="#BR-005">BR-005</a></td></tr>
+<tr id="VR-10"><th scope="row">VR-10</th><td><a href="#ITM-07">ITM-07</a> 支払条件</td><td>必須</td><td>未選択</td><td>F, C</td><td><a href="#MSG-E001">MSG-E001</a></td><td></td></tr>
+<tr id="VR-11"><th scope="row">VR-11</th><td><a href="#ITM-08">ITM-08</a> 商品コード</td><td>必須</td><td>未入力</td><td>F, C</td><td><a href="#MSG-E001">MSG-E001</a></td><td></td></tr>
+<tr id="VR-12" data-pattern="^P-[0-9]{4}$" data-format-label="「P-」＋数字4桁"><th scope="row">VR-12</th><td><a href="#ITM-08">ITM-08</a> 商品コード</td><td>形式</td><td>正規表現 ^P-[0-9]{4}$ に一致しない</td><td>F, C</td><td><a href="#MSG-E002">MSG-E002</a></td><td></td></tr>
+<tr id="VR-13"><th scope="row">VR-13</th><td><a href="#ITM-08">ITM-08</a> 商品コード</td><td>存在</td><td>商品マスタに存在しない</td><td>F, C</td><td><a href="#MSG-E003">MSG-E003</a></td><td></td></tr>
+<tr id="VR-14"><th scope="row">VR-14</th><td><a href="#ITM-10">ITM-10</a> 数量</td><td>必須</td><td>未入力</td><td>F, C</td><td><a href="#MSG-E001">MSG-E001</a></td><td></td></tr>
+<tr id="VR-15" data-min="1" data-max="9999"><th scope="row">VR-15</th><td><a href="#ITM-10">ITM-10</a> 数量</td><td>範囲</td><td>整数でない、または 1〜9,999 の範囲外</td><td>F, C</td><td><a href="#MSG-E006">MSG-E006</a></td><td></td></tr>
+<tr id="VR-16"><th scope="row">VR-16</th><td><a href="#ITM-16">ITM-16</a> 承認者</td><td>条件付き必須</td><td>合計金額（税込）が 1,000,000 円以上で未選択</td><td>F, C</td><td><a href="#MSG-E007">MSG-E007</a></td><td><a href="#BR-002">BR-002</a></td></tr>
+<tr id="VR-17"><th scope="row">VR-17</th><td><a href="#ITM-16">ITM-16</a> 承認者</td><td>本人承認の禁止</td><td>承認者がログインユーザー本人</td><td>F, C</td><td><a href="#MSG-E008">MSG-E008</a></td><td><a href="#BR-003">BR-003</a></td></tr>
+<tr id="VR-18" data-max="200"><th scope="row">VR-18</th><td><a href="#ITM-17">ITM-17</a> 備考</td><td>文字数</td><td>201文字以上</td><td>F, C</td><td><a href="#MSG-E009">MSG-E009</a></td><td></td></tr>
+<tr id="VR-19"><th scope="row">VR-19</th><td><a href="#ITM-15">ITM-15</a> 合計金額（税込）</td><td>合計金額</td><td>合計金額（税込）が 0 円以下</td><td>C</td><td><a href="#MSG-E010">MSG-E010</a></td><td><a href="#BR-001">BR-001</a></td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section id="rules" aria-labelledby="h-rules">
+<h2 id="h-rules">7. 業務ルール</h2>
+<div class="table-wrap"><table id="tbl-rules">
+<thead><tr><th scope="col">ルールID</th><th scope="col">ルール名</th><th scope="col">内容</th><th scope="col">備考</th><th scope="col">関連</th></tr></thead>
+<tbody>
+<tr id="BR-001"><th scope="row">BR-001</th><td>合計金額の下限</td><td>合計金額（税込）が 0 円以下の受注は登録できない。</td><td>単価 0 円の商品（販促サンプル品）のみの受注が該当する。</td><td><a href="#VR-19">VR-19</a></td></tr>
+<tr id="BR-002" data-threshold="1000000"><th scope="row">BR-002</th><td>高額受注の承認</td><td>合計金額（税込）が 1,000,000 円以上の受注は、営業マネージャーの承認を必須とする。承認者を選択して登録し、登録後のステータスは「承認待ち」とする。1,000,000 円未満の受注は「受注確定」とする。</td><td>閾値は税込金額で判定する。</td><td><a href="#ITM-16">ITM-16</a>, <a href="#VR-16">VR-16</a>, <a href="#EV-11">EV-11</a></td></tr>
+<tr id="BR-003"><th scope="row">BR-003</th><td>本人承認の禁止</td><td>登録者（ログインユーザー）は自分自身を承認者にできない。</td><td>画面のチェックは補助である。最終的な権限チェックはサーバー側で行う（本デモの対象外）。</td><td><a href="#VR-17">VR-17</a></td></tr>
+<tr id="BR-004"><th scope="row">BR-004</th><td>確認ボタンの活性条件</td><td>必須項目（条件付き必須を含む）がすべて入力済みで、エラー表示中の項目がない場合にのみ、確認ボタンを活性にする。押下時は全チェックを再実行し、すべて OK の場合にのみ確認画面へ進む。</td><td><a href="#VR-19">VR-19</a> は確認ボタン押下時にのみ判定する。</td><td><a href="#BTN-04">BTN-04</a>, <a href="#EV-08">EV-08</a></td></tr>
+<tr id="BR-005"><th scope="row">BR-005</th><td>希望納期</td><td>希望納期は受注日の翌日以降でなければならない。</td><td>営業日・休日の考慮は対象外。</td><td><a href="#VR-09">VR-09</a></td></tr>
+<tr id="BR-006" data-rate="0.10"><th scope="row">BR-006</th><td>消費税の計算</td><td>消費税は小計 × 10%（1円未満切り捨て）、合計金額（税込）は小計 ＋ 消費税とする。</td><td>軽減税率は対象外。</td><td><a href="#ITM-13">ITM-13</a>〜<a href="#ITM-15">ITM-15</a></td></tr>
+<tr id="BR-007"><th scope="row">BR-007</th><td>取引停止顧客</td><td>取引状態が「取引停止」の顧客の受注は登録できない。</td><td></td><td><a href="#VR-06">VR-06</a></td></tr>
+<tr id="BR-008"><th scope="row">BR-008</th><td>単価の固定</td><td>単価は商品マスタの値を使用し、画面では変更できない。</td><td>値引きは対象外。</td><td><a href="#ITM-11">ITM-11</a></td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section id="messages" aria-labelledby="h-messages">
+<h2 id="h-messages">8. メッセージ</h2>
+<div class="table-wrap"><table id="tbl-messages">
+<thead><tr><th scope="col">メッセージID</th><th scope="col">種別</th><th scope="col">メッセージ</th><th scope="col">パラメータ</th></tr></thead>
+<tbody>
+<tr id="MSG-E001"><th scope="row">MSG-E001</th><td>エラー</td><td class="msg-text">{0}を入力してください。</td><td>{0}＝項目名</td></tr>
+<tr id="MSG-E002"><th scope="row">MSG-E002</th><td>エラー</td><td class="msg-text">{0}の形式が正しくありません。{1}で入力してください。</td><td>{0}＝項目名、{1}＝形式</td></tr>
+<tr id="MSG-E003"><th scope="row">MSG-E003</th><td>エラー</td><td class="msg-text">入力された{0}は登録されていません。</td><td>{0}＝項目名</td></tr>
+<tr id="MSG-E004"><th scope="row">MSG-E004</th><td>エラー</td><td class="msg-text">取引停止中の顧客のため、受注を登録できません。</td><td>—</td></tr>
+<tr id="MSG-E005"><th scope="row">MSG-E005</th><td>エラー</td><td class="msg-text">希望納期は受注日の翌日以降の日付を入力してください。</td><td>—</td></tr>
+<tr id="MSG-E006"><th scope="row">MSG-E006</th><td>エラー</td><td class="msg-text">数量は1〜9,999の整数で入力してください。</td><td>—</td></tr>
+<tr id="MSG-E007"><th scope="row">MSG-E007</th><td>エラー</td><td class="msg-text">合計金額が1,000,000円以上のため、承認者を選択してください。</td><td>—</td></tr>
+<tr id="MSG-E008"><th scope="row">MSG-E008</th><td>エラー</td><td class="msg-text">登録者本人を承認者に選択することはできません。</td><td>—</td></tr>
+<tr id="MSG-E009"><th scope="row">MSG-E009</th><td>エラー</td><td class="msg-text">備考は200文字以内で入力してください。</td><td>—</td></tr>
+<tr id="MSG-E010"><th scope="row">MSG-E010</th><td>エラー</td><td class="msg-text">合計金額が0円のため、受注を登録できません。</td><td>—</td></tr>
+<tr id="MSG-E011"><th scope="row">MSG-E011</th><td>エラー</td><td class="msg-text">入力内容にエラーがあります（{0}件）。内容を確認してください。</td><td>{0}＝エラー件数</td></tr>
+<tr id="MSG-I001"><th scope="row">MSG-I001</th><td>情報</td><td class="msg-text">受注を登録しました（受注番号：{0}、ステータス：受注確定）。</td><td>{0}＝受注番号</td></tr>
+<tr id="MSG-I002"><th scope="row">MSG-I002</th><td>情報</td><td class="msg-text">受注を登録し、承認を依頼しました（受注番号：{0}、承認者：{1}）。</td><td>{0}＝受注番号、{1}＝承認者名</td></tr>
+<tr id="MSG-Q001"><th scope="row">MSG-Q001</th><td>確認</td><td class="msg-text">入力内容をクリアします。よろしいですか？</td><td>—</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section id="states" aria-labelledby="h-states">
+<h2 id="h-states">9. 画面状態</h2>
+<div class="table-wrap"><table id="tbl-states">
+<thead><tr><th scope="col">状態ID</th><th scope="col">状態名</th><th scope="col">表示</th><th scope="col">ボタン</th><th scope="col">遷移</th></tr></thead>
+<tbody>
+<tr id="ST-01"><th scope="row">ST-01</th><td>初期表示</td><td>入力項目は初期値。<a href="#A-02">A-02</a> は非表示。</td><td><a href="#BTN-01">BTN-01</a>、<a href="#BTN-03">BTN-03</a> 活性／<a href="#BTN-02">BTN-02</a>、<a href="#BTN-04">BTN-04</a> 非活性</td><td>入力 → <a href="#ST-02">ST-02</a></td></tr>
+<tr id="ST-02"><th scope="row">ST-02</th><td>入力中</td><td>入力可能。承認者の必須表示は <a href="#BR-002">BR-002</a> に従う。</td><td><a href="#BTN-04">BTN-04</a> は <a href="#BR-004">BR-004</a> に従う</td><td>エラー発生 → <a href="#ST-03">ST-03</a>／確認 → <a href="#ST-04">ST-04</a></td></tr>
+<tr id="ST-03"><th scope="row">ST-03</th><td>入力エラー</td><td>エラー項目を赤枠で表示し、項目の下にメッセージを表示する。確認ボタン押下時は <a href="#A-02">A-02</a> にエラー件数と一覧を表示する。</td><td><a href="#BTN-04">BTN-04</a> 非活性（エラー解消まで）</td><td>エラー解消 → <a href="#ST-02">ST-02</a></td></tr>
+<tr id="ST-04"><th scope="row">ST-04</th><td>確認</td><td>入力内容を読み取り専用で表示する。承認が必要な場合は承認者を強調表示する。</td><td><a href="#BTN-05">BTN-05</a>、<a href="#BTN-06">BTN-06</a> のみ表示</td><td>戻る → <a href="#ST-02">ST-02</a>／登録 → <a href="#ST-05">ST-05</a></td></tr>
+<tr id="ST-05"><th scope="row">ST-05</th><td>登録処理中</td><td>処理中の表示を出す。</td><td>全ボタン非活性（二重送信防止）</td><td>完了 → <a href="#ST-06">ST-06</a></td></tr>
+<tr id="ST-06"><th scope="row">ST-06</th><td>登録完了</td><td>受注番号と <a href="#MSG-I001">MSG-I001</a> または <a href="#MSG-I002">MSG-I002</a> を表示する。</td><td><a href="#BTN-07">BTN-07</a> のみ表示</td><td>新規受注 → <a href="#ST-01">ST-01</a></td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section id="testdata" aria-labelledby="h-testdata">
+<h2 id="h-testdata">10. テストデータ</h2>
+<h3>10.1 顧客マスタ</h3>
+<div class="table-wrap"><table id="tbl-td-customers">
+<thead><tr><th scope="col">顧客コード</th><th scope="col">顧客名</th><th scope="col">取引状態</th></tr></thead>
+<tbody>
+<tr><td>C00001</td><td>株式会社サンプル商事</td><td>取引中</td></tr>
+<tr><td>C00002</td><td>テスト工業株式会社</td><td>取引中</td></tr>
+<tr><td>C00099</td><td>停止物産株式会社</td><td>取引停止</td></tr>
+</tbody>
+</table></div>
+<h3>10.2 商品マスタ</h3>
+<div class="table-wrap"><table id="tbl-td-products">
+<thead><tr><th scope="col">商品コード</th><th scope="col">商品名</th><th scope="col">単価（円）</th></tr></thead>
+<tbody>
+<tr><td>P-1001</td><td>業務用ノートPC</td><td>158,000</td></tr>
+<tr><td>P-1002</td><td>27インチモニター</td><td>42,800</td></tr>
+<tr><td>P-2001</td><td>年間保守サービス</td><td>120,000</td></tr>
+<tr><td>P-3001</td><td>サーバー構築一式</td><td>909,091</td></tr>
+<tr><td>P-9000</td><td>販促サンプル品</td><td>0</td></tr>
+</tbody>
+</table></div>
+<h3>10.3 社員</h3>
+<div class="table-wrap"><table id="tbl-td-users">
+<thead><tr><th scope="col">社員コード</th><th scope="col">氏名</th><th scope="col">役割</th></tr></thead>
+<tbody>
+<tr><td>U001</td><td>山田 太郎</td><td>営業担当者</td></tr>
+<tr><td>U101</td><td>佐藤 花子</td><td>営業マネージャー</td></tr>
+<tr><td>U102</td><td>鈴木 一郎</td><td>営業マネージャー</td></tr>
+</tbody>
+</table></div>
+</section>
+      </main>
+    </div>
+    <footer>このファイルは単体で動作します（外部ライブラリ・通信なし）。画面プレビューのデータとルールは、本書の表から読み込みます。</footer>
+    <script>
+      (() => {
+        "use strict";
+        const $ = (s, r = document) => r.querySelector(s);
+        const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+        // ---- Spec data: read from this document's own tables (single source inside the file)
+        const tableRows = (id) => $$(`#${id} tbody tr`).map((tr) => [...tr.cells].map((c) => c.textContent.trim()));
+        const customers = new Map(tableRows("tbl-td-customers").map(([code, name, status]) => [code, { name, status }]));
+        const products = new Map(tableRows("tbl-td-products").map(([code, name, price]) => [code, { name, price: Number(price.replace(/,/g, "")) }]));
+        const users = new Map(tableRows("tbl-td-users").map(([code, name, role]) => [code, { name, role }]));
+        const param = (id, key) => document.getElementById(id).dataset[key];
+        const itemName = (id) => document.getElementById(id).cells[3].textContent.trim();
+        const stateName = (id) => document.getElementById(id).cells[1].textContent.trim();
+        const msg = (id, ...args) => document.getElementById(id).querySelector(".msg-text").textContent.replace(/\{(\d)\}/g, (_, i) => args[Number(i)]);
+
+        const CUSTOMER_RE = new RegExp(param("VR-04", "pattern"));
+        const PRODUCT_RE = new RegExp(param("VR-12", "pattern"));
+        const QTY_MIN = Number(param("VR-15", "min"));
+        const QTY_MAX = Number(param("VR-15", "max"));
+        const REMARKS_MAX = Number(param("VR-18", "max"));
+        const APPROVAL_THRESHOLD = Number(param("BR-002", "threshold"));
+        const TAX_PERCENT = Math.round(Number(param("BR-006", "rate")) * 100);
+        const MAX_LINES = 5; // EV-05 / BTN-01
+        const yen = (n) => n.toLocaleString("ja-JP");
+
+        // ---- Elements
+        const screen = $("#screen");
+        const f = {
+          orderDate: $("#f-orderDate"), customer: $("#f-customer"), customerName: $("#f-customerName"),
+          delivery: $("#f-delivery"), payment: $("#f-payment"), approver: $("#f-approver"), remarks: $("#f-remarks"),
+        };
+        const linesBody = $("#lines");
+        const btn = { add: $("#btn-addLine"), clear: $("#btn-clear"), confirm: $("#btn-confirm"), back: $("#btn-back"), register: $("#btn-register"), next: $("#btn-new") };
+        let currentUser = "U001";
+        let pristine = true;
+        let lineSeq = 0;
+        let orderSeq = 0;
+        const errors = new Map(); // key -> {vr, msgId, text, target}
+
+        for (const [code, u] of users) {
+          if (u.role === "営業マネージャー") f.approver.add(new Option(`${u.name}（${code}）`, code));
+        }
+
+        // ---- Event log
+        const logList = $("#event-log");
+        function log(text, ng = false) {
+          const li = document.createElement("li");
+          li.textContent = text;
+          if (ng) li.className = "ng";
+          logList.prepend(li);
+        }
+
+        // ---- Validators: each returns null (OK) or {vr, msgId, args}
+        const err = (vr, msgId, ...args) => ({ vr, msgId, args });
+        const isDate = (v) => {
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return false;
+          const [y, m, d] = v.split("-").map(Number);
+          const dt = new Date(Date.UTC(y, m - 1, d));
+          return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+        };
+        const V = {
+          orderDate: (v) => (!v ? err("VR-01", "MSG-E001", itemName("ITM-03")) : !isDate(v) ? err("VR-02", "MSG-E002", itemName("ITM-03"), "YYYY-MM-DD") : null),
+          customer: (v) => {
+            if (!v) return err("VR-03", "MSG-E001", itemName("ITM-04"));
+            if (!CUSTOMER_RE.test(v)) return err("VR-04", "MSG-E002", itemName("ITM-04"), param("VR-04", "formatLabel"));
+            const c = customers.get(v);
+            if (!c) return err("VR-05", "MSG-E003", itemName("ITM-04"));
+            if (c.status === "取引停止") return err("VR-06", "MSG-E004");
+            return null;
+          },
+          delivery: (v) => {
+            if (!v) return err("VR-07", "MSG-E001", itemName("ITM-06"));
+            if (!isDate(v)) return err("VR-08", "MSG-E002", itemName("ITM-06"), "YYYY-MM-DD");
+            const od = f.orderDate.value.trim();
+            if (isDate(od) && v <= od) return err("VR-09", "MSG-E005");
+            return null;
+          },
+          payment: (v) => (!v ? err("VR-10", "MSG-E001", itemName("ITM-07")) : null),
+          code: (v) => (!v ? err("VR-11", "MSG-E001", itemName("ITM-08")) : !PRODUCT_RE.test(v) ? err("VR-12", "MSG-E002", itemName("ITM-08"), param("VR-12", "formatLabel")) : !products.has(v) ? err("VR-13", "MSG-E003", itemName("ITM-08")) : null),
+          qty: (v) => {
+            if (!v) return err("VR-14", "MSG-E001", itemName("ITM-10"));
+            const n = Number(v);
+            return /^\d+$/.test(v) && n >= QTY_MIN && n <= QTY_MAX ? null : err("VR-15", "MSG-E006");
+          },
+          approver: (v) => (needsApproval() && !v ? err("VR-16", "MSG-E007") : v && v === currentUser ? err("VR-17", "MSG-E008") : null),
+          remarks: (v) => ([...v].length > REMARKS_MAX ? err("VR-18", "MSG-E009") : null),
+        };
+
+        function show(key, input, errorEl, result) {
+          if (result) {
+            const text = msg(result.msgId, ...result.args);
+            errorEl.innerHTML = "";
+            errorEl.append(text);
+            const ref = document.createElement("span");
+            ref.className = "rule-ref";
+            ref.textContent = `[${result.vr} / ${result.msgId}]`;
+            errorEl.append(ref);
+            input.setAttribute("aria-invalid", "true");
+            errors.set(key, { ...result, text, target: input });
+          } else {
+            errorEl.textContent = "";
+            input.removeAttribute("aria-invalid");
+            errors.delete(key);
+          }
+        }
+        function check(name) {
+          const input = f[name];
+          const res = V[name](input.value.trim());
+          show(name, input, $(`#e-${name}`), res);
+          return res;
+        }
+        function checkLine(tr, kind) {
+          const input = $(`input.${kind}`, tr);
+          const res = V[kind](input.value.trim());
+          show(`${kind}-${tr.dataset.uid}`, input, input.nextElementSibling, res);
+          return res;
+        }
+
+        // ---- Lines (A-04)
+        function addLine(code = "", qty = "1") {
+          const tr = $("#line-template").content.firstElementChild.cloneNode(true);
+          tr.dataset.uid = String(++lineSeq);
+          const codeIn = $("input.code", tr);
+          const qtyIn = $("input.qty", tr);
+          codeIn.value = code;
+          qtyIn.value = qty;
+          codeIn.addEventListener("focusout", () => onCodeOut(tr));
+          qtyIn.addEventListener("focusout", () => onQtyOut(tr));
+          $("button.del", tr).addEventListener("click", () => {
+            const no = $(".no", tr).textContent;
+            for (const k of ["code", "qty"]) errors.delete(`${k}-${tr.dataset.uid}`);
+            tr.remove();
+            renumber();
+            recalc();
+            log(`EV-06 行削除：明細${no}を削除し再計算`);
+            touch();
+          });
+          linesBody.append(tr);
+          renumber();
+          return tr;
+        }
+        function renumber() {
+          const rows = $$("tr", linesBody);
+          rows.forEach((tr, i) => {
+            $(".no", tr).textContent = String(i + 1);
+            $("input.code", tr).setAttribute("aria-label", `明細${i + 1} 商品コード`);
+            $("input.qty", tr).setAttribute("aria-label", `明細${i + 1} 数量`);
+            $("button.del", tr).setAttribute("aria-label", `明細${i + 1}を削除`);
+            $("button.del", tr).disabled = rows.length <= 1;
+          });
+          btn.add.disabled = rows.length >= MAX_LINES;
+        }
+        function lineProduct(tr) {
+          const code = $("input.code", tr).value.trim();
+          return PRODUCT_RE.test(code) ? products.get(code) : undefined;
+        }
+        function onCodeOut(tr) {
+          const res = checkLine(tr, "code");
+          const p = res ? undefined : lineProduct(tr);
+          $(".pname", tr).textContent = p ? p.name : "";
+          $(".price", tr).textContent = p ? yen(p.price) : "";
+          recalc();
+          log(`EV-03 商品コード確定（明細${$(".no", tr).textContent}）：${res ? `${res.vr} NG（${res.msgId}）` : "VR-11〜VR-13 OK、商品名・単価を表示"}`, !!res);
+          touch();
+        }
+        function onQtyOut(tr) {
+          const res = checkLine(tr, "qty");
+          recalc();
+          log(`EV-04 数量変更（明細${$(".no", tr).textContent}）：${res ? `${res.vr} NG（${res.msgId}）` : "VR-14・VR-15 OK、BR-006 で再計算"}`, !!res);
+          touch();
+        }
+
+        // ---- Totals (A-05), BR-002 / BR-006
+        let total = 0;
+        function totals() {
+          let subtotal = 0;
+          for (const tr of $$("tr", linesBody)) {
+            const p = lineProduct(tr);
+            const q = $("input.qty", tr).value.trim();
+            const ok = p && !V.qty(q);
+            const amount = ok ? p.price * Number(q) : 0;
+            $(".amount", tr).textContent = ok ? yen(amount) : "";
+            subtotal += amount;
+          }
+          const tax = Math.floor((subtotal * TAX_PERCENT) / 100);
+          return { subtotal, tax, total: subtotal + tax };
+        }
+        function needsApproval() {
+          return total >= APPROVAL_THRESHOLD;
+        }
+        function recalc() {
+          const t = totals();
+          const before = needsApproval();
+          total = t.total;
+          $("#f-subtotal").textContent = yen(t.subtotal);
+          $("#f-tax").textContent = yen(t.tax);
+          $("#f-total").textContent = yen(t.total);
+          $("#approver-req").hidden = !needsApproval();
+          if (before !== needsApproval()) {
+            log(`BR-002 判定：合計 ${yen(total)}円 → 承認者は${needsApproval() ? "必須" : "任意"}`);
+            if (errors.has("approver") || f.approver.value) check("approver");
+          }
+        }
+
+        // ---- BR-004: confirm button
+        function requiredFilled() {
+          const base = ["orderDate", "customer", "delivery", "payment"].every((k) => f[k].value.trim() !== "");
+          const lines = $$("tr", linesBody).every((tr) => $("input.code", tr).value.trim() && $("input.qty", tr).value.trim());
+          return base && lines && (!needsApproval() || f.approver.value !== "");
+        }
+        function updateConfirm() {
+          btn.confirm.disabled = !(requiredFilled() && errors.size === 0);
+        }
+
+        // ---- States
+        function setState(id) {
+          screen.dataset.state = id;
+          $("#demo-state").value = `${id} ${stateName(id)}`;
+          const input = ["ST-01", "ST-02", "ST-03"].includes(id);
+          const confirm = id === "ST-04" || id === "ST-05";
+          $("#view-input").hidden = !input;
+          $("#view-confirm").hidden = !confirm;
+          $("#view-done").hidden = id !== "ST-06";
+          btn.clear.hidden = btn.confirm.hidden = !input;
+          for (const b of $$(".scr-buttons .spec-badge")) b.hidden = !input;
+          btn.back.hidden = btn.register.hidden = !confirm;
+          btn.back.disabled = btn.register.disabled = id === "ST-05";
+          btn.next.hidden = id !== "ST-06";
+          $("#busy").hidden = id !== "ST-05";
+          if (input) updateConfirm();
+        }
+        function touch() {
+          pristine = false;
+          if (errors.size === 0) hideMessages();
+          setState(errors.size ? "ST-03" : "ST-02");
+        }
+        function hideMessages() {
+          const box = $("#scr-messages");
+          box.hidden = true;
+          box.className = "scr-messages";
+          box.innerHTML = "";
+        }
+        function showErrorsSummary(list) {
+          const box = $("#scr-messages");
+          box.className = "scr-messages error";
+          box.innerHTML = "";
+          const p = document.createElement("p");
+          p.textContent = msg("MSG-E011", String(list.length));
+          const ul = document.createElement("ul");
+          for (const e of list) {
+            const li = document.createElement("li");
+            const a = document.createElement("a");
+            a.href = "#";
+            a.textContent = e.text;
+            a.addEventListener("click", (ev) => {
+              ev.preventDefault();
+              e.target.focus();
+            });
+            li.append(a);
+            ul.append(li);
+          }
+          box.append(p, ul);
+          box.hidden = false;
+        }
+
+        // ---- EV-01 / EV-10 / EV-12: initial state
+        function today() {
+          const d = new Date();
+          return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+        }
+        function init() {
+          errors.clear();
+          for (const k of ["customer", "delivery", "payment", "approver", "remarks"]) f[k].value = "";
+          f.orderDate.value = today();
+          f.customerName.textContent = "";
+          $("#f-orderNo").textContent = "（登録時に採番）";
+          for (const el of $$(".field-error", $("#view-input"))) el.textContent = "";
+          for (const el of $$("[aria-invalid]")) el.removeAttribute("aria-invalid");
+          linesBody.innerHTML = "";
+          addLine();
+          recalc();
+          $("#remarks-count").textContent = `0 / ${REMARKS_MAX}文字`;
+          hideMessages();
+          pristine = true;
+          setState("ST-01");
+          log("EV-01 画面初期表示：受注日＝システム日付、数量＝1、確認ボタン非活性");
+        }
+
+        // ---- Field events
+        f.orderDate.addEventListener("focusout", () => {
+          const r = check("orderDate");
+          if (f.delivery.value.trim()) check("delivery");
+          log(`受注日 チェック：${r ? `${r.vr} NG（${r.msgId}）` : "VR-01・VR-02 OK"}`, !!r);
+          touch();
+        });
+        f.customer.addEventListener("focusout", () => {
+          const r = check("customer");
+          f.customerName.textContent = r ? "" : customers.get(f.customer.value.trim()).name;
+          log(`EV-02 顧客コード確定：${r ? `${r.vr} NG（${r.msgId}）` : "VR-04〜VR-06 OK、顧客名を表示"}`, !!r);
+          touch();
+        });
+        f.delivery.addEventListener("focusout", () => {
+          const r = check("delivery");
+          log(`希望納期 チェック：${r ? `${r.vr} NG（${r.msgId}）` : "VR-07〜VR-09 OK"}`, !!r);
+          touch();
+        });
+        f.payment.addEventListener("change", () => {
+          const r = check("payment");
+          log(`支払条件 チェック：${r ? `${r.vr} NG（${r.msgId}）` : "VR-10 OK"}`, !!r);
+          touch();
+        });
+        f.approver.addEventListener("change", () => {
+          const r = check("approver");
+          log(`EV-07 承認者変更：${r ? `${r.vr} NG（${r.msgId}）` : "VR-16・VR-17 OK"}`, !!r);
+          touch();
+        });
+        f.remarks.addEventListener("input", () => {
+          $("#remarks-count").textContent = `${[...f.remarks.value].length} / ${REMARKS_MAX}文字`;
+        });
+        f.remarks.addEventListener("focusout", () => {
+          const r = check("remarks");
+          if (r) log(`備考 チェック：${r.vr} NG（${r.msgId}）`, true);
+          touch();
+        });
+        $("#order-form").addEventListener("input", () => {
+          if (!pristine || screen.dataset.state === "ST-01") updateConfirm();
+        });
+        $("#order-form").addEventListener("change", updateConfirm);
+        btn.add.addEventListener("click", () => {
+          addLine();
+          log(`EV-05 行追加：明細${$$("tr", linesBody).length}行`);
+          touch();
+        });
+
+        // ---- EV-08 確認
+        btn.confirm.addEventListener("click", () => {
+          for (const k of ["orderDate", "customer", "delivery", "payment", "approver", "remarks"]) check(k);
+          for (const tr of $$("tr", linesBody)) {
+            checkLine(tr, "code");
+            checkLine(tr, "qty");
+          }
+          recalc();
+          const list = [...errors.values()];
+          if (total <= 0) list.push({ vr: "VR-19", msgId: "MSG-E010", text: msg("MSG-E010"), target: $("input.code", linesBody) });
+          if (list.length) {
+            showErrorsSummary(list);
+            setState("ST-03");
+            btn.confirm.disabled = true;
+            log(`EV-08 確認：エラー ${list.length}件（${list.map((e) => e.vr).join("、")}）`, true);
+            if (total <= 0 && errors.size === 0) btn.confirm.disabled = false;
+            return;
+          }
+          renderConfirm();
+          hideMessages();
+          setState("ST-04");
+          log("EV-08 確認：VR-01〜VR-19 OK → 確認画面");
+        });
+
+        function renderConfirm() {
+          const view = $("#view-confirm");
+          view.innerHTML = "";
+          const note = document.createElement("p");
+          note.className = "confirm-note" + (needsApproval() ? " approval" : "");
+          note.textContent = needsApproval()
+            ? `合計金額が${yen(APPROVAL_THRESHOLD)}円以上のため、登録後は承認待ちになります（承認者：${users.get(f.approver.value).name}）。`
+            : "以下の内容で登録します。内容を確認してください。";
+          const dl = document.createElement("dl");
+          dl.className = "confirm-list";
+          const pay = f.payment.selectedOptions[0].textContent;
+          const pairs = [
+            [itemName("ITM-03"), f.orderDate.value],
+            [itemName("ITM-04"), `${f.customer.value}　${f.customerName.textContent}`],
+            [itemName("ITM-06"), f.delivery.value],
+            [itemName("ITM-07"), pay],
+            ...$$("tr", linesBody).map((tr, i) => [`明細${i + 1}`, `${$("input.code", tr).value}　${$(".pname", tr).textContent}　× ${$("input.qty", tr).value}　${$(".amount", tr).textContent}円`]),
+            [itemName("ITM-13"), `${$("#f-subtotal").textContent}円`],
+            [itemName("ITM-14"), `${$("#f-tax").textContent}円`],
+            [itemName("ITM-15"), `${$("#f-total").textContent}円`],
+            [itemName("ITM-16"), f.approver.value ? users.get(f.approver.value).name : "—"],
+            [itemName("ITM-17"), f.remarks.value || "—"],
+          ];
+          for (const [k, v] of pairs) {
+            const dt = document.createElement("dt");
+            const dd = document.createElement("dd");
+            dt.textContent = k;
+            dd.textContent = v;
+            dl.append(dt, dd);
+          }
+          view.append(note, dl);
+        }
+        btn.back.addEventListener("click", () => {
+          setState("ST-02");
+          log("EV-09 戻る：入力値を保持して入力画面へ");
+        });
+        btn.register.addEventListener("click", () => {
+          setState("ST-05");
+          log("EV-11 登録：ST-05 登録処理中（全ボタン非活性）");
+          setTimeout(() => {
+            const no = `ORD-${f.orderDate.value.replace(/-/g, "")}-${String(++orderSeq).padStart(4, "0")}`;
+            const approval = needsApproval();
+            const text = approval ? msg("MSG-I002", no, users.get(f.approver.value).name) : msg("MSG-I001", no);
+            $("#f-orderNo").textContent = no;
+            const view = $("#view-done");
+            view.innerHTML = "";
+            const wrap = document.createElement("div");
+            wrap.className = "done";
+            const p = document.createElement("p");
+            p.textContent = itemName("ITM-02");
+            const n = document.createElement("p");
+            n.className = "order-no";
+            n.id = "done-order-no";
+            n.textContent = no;
+            const s = document.createElement("p");
+            s.textContent = `ステータス：${approval ? "承認待ち" : "受注確定"}`;
+            wrap.append(p, n, s);
+            view.append(wrap);
+            const box = $("#scr-messages");
+            box.className = "scr-messages info";
+            box.innerHTML = "";
+            const m = document.createElement("p");
+            m.textContent = text;
+            box.append(m);
+            box.hidden = false;
+            setState("ST-06");
+            log(`EV-11 登録完了：${no}（BR-002 ${approval ? "該当 → 承認待ち、MSG-I002" : "非該当 → 受注確定、MSG-I001"}）`);
+          }, 600);
+        });
+        btn.clear.addEventListener("click", () => {
+          if (window.confirm(msg("MSG-Q001"))) {
+            log("EV-10 クリア：MSG-Q001 OK");
+            init();
+          }
+        });
+        btn.next.addEventListener("click", () => {
+          log("EV-12 新規受注");
+          init();
+        });
+
+        // ---- Review bar (outside the spec)
+        $("#demo-user").addEventListener("change", (e) => {
+          currentUser = e.target.value;
+          const u = users.get(currentUser);
+          $("#f-user").textContent = `${u.name}（${currentUser}）`;
+          log(`[デモ] ログインユーザーを ${u.name} に切替`);
+          if (f.approver.value) check("approver");
+          if (!pristine) touch();
+        });
+        $("#demo-ids").addEventListener("change", (e) => screen.classList.toggle("show-ids", e.target.checked));
+        const addDays = (iso, n) => {
+          const [y, m, d] = iso.split("-").map(Number);
+          const dt = new Date(Date.UTC(y, m - 1, d + n));
+          return dt.toISOString().slice(0, 10);
+        };
+        const SAMPLES = {
+          normal: { customer: "C00001", delivery: 7, payment: "01", lines: [["P-1002", "3"], ["P-2001", "1"]] },
+          approval: { customer: "C00002", delivery: 14, payment: "01", lines: [["P-1001", "7"]] },
+          error: { customer: "C00099", delivery: 0, payment: "", lines: [["P-12", "0"]] },
+        };
+        for (const b of $$("[data-sample]")) {
+          b.addEventListener("click", () => {
+            const s = SAMPLES[b.dataset.sample];
+            init();
+            f.customer.value = s.customer;
+            f.delivery.value = addDays(f.orderDate.value, s.delivery);
+            f.payment.value = s.payment;
+            linesBody.innerHTML = "";
+            for (const [c, q] of s.lines) addLine(c, q);
+            log(`[デモ] サンプル入力「${b.textContent}」`);
+            f.customer.dispatchEvent(new Event("focusout"));
+            f.delivery.dispatchEvent(new Event("focusout"));
+            if (s.payment) f.payment.dispatchEvent(new Event("change"));
+            for (const tr of $$("tr", linesBody)) {
+              onCodeOut(tr);
+              onQtyOut(tr);
+            }
+            updateConfirm();
+          });
+        }
+
+        init();
+      })();
+    </script>
+  </body>
+</html>

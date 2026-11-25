@@ -1,0 +1,40 @@
+{
+  "model": "claude-haiku-5-5",
+  "requestedModel": "haiku",
+  "sdk": "@anthropic-ai/claude-agent-sdk 0.3.325",
+  "measuredAt": "2026-11-25T07:15:25.208Z",
+  "method": "input tokens (incl. cache read/creation) of wrapper+document minus wrapper with empty document",
+  "baseline": [
+    1703,
+    1708
+  ],
+  "rawInputTokens": {
+    "xlsx_structured": 10145,
+    "xlsx_markitdown": 19689,
+    "md_raw": 9962,
+    "html_raw": 34447,
+    "html_no_css_js": 20937,
+    "html_spec_only": 17720,
+    "html_spec_nolinks": 14943,
+    "html_markitdown": 12030,
+    "html_css_only": 6306,
+    "html_js_only": 10614,
+    "html_preview_only": 4912,
+    "json_source": 10782
+  },
+  "counts": {
+    "xlsx_structured": 8442,
+    "xlsx_markitdown": 17986,
+    "md_raw": 8259,
+    "html_raw": 32744,
+    "html_no_css_js": 19234,
+    "html_spec_only": 16017,
+    "html_spec_nolinks": 13240,
+    "html_markitdown": 10327,
+    "html_css_only": 4603,
+    "html_js_only": 8911,
+    "html_preview_only": 3209,
+    "json_source": 9079
+  },
+  "totalCostUsd": 0.0288
+}

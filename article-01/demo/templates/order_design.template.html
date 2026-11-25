@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>{{TITLE}}</title>
+    <style>
+      :root {
+        --ink: #1d2733;
+        --muted: #5b6776;
+        --line: #d5dbe3;
+        --bg: #f6f8fa;
+        --paper: #ffffff;
+        --accent: #1f4e79;
+        --accent-soft: #e6eef7;
+        --error: #b42318;
+        --error-soft: #fdecea;
+        --ok: #1a7f37;
+        --ok-soft: #e7f5ec;
+        --mark: #fff4c2;
+        font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", Meiryo, system-ui, sans-serif;
+        color: var(--ink);
+        line-height: 1.6;
+      }
+      * { box-sizing: border-box; }
+      [hidden] { display: none !important; }
+      body { margin: 0; background: var(--bg); font-size: 14px; }
+      a { color: var(--accent); }
+      code, .id { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 0.92em; }
+      .doc-header { background: var(--accent); color: #fff; padding: 20px 16px; }
+      .doc-header .system { margin: 0; opacity: 0.85; font-size: 13px; }
+      .doc-header h1 { margin: 4px 0 8px; font-size: 22px; line-height: 1.3; }
+      .doc-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+      .doc-meta li { background: rgba(255, 255, 255, 0.16); border-radius: 4px; padding: 2px 8px; font-size: 12px; }
+      .disclaimer { margin: 10px 0 0; font-size: 12px; opacity: 0.9; }
+      .layout { display: grid; grid-template-columns: minmax(0, 1fr); max-width: 1440px; margin: 0 auto; }
+      nav.toc { background: var(--paper); border-bottom: 1px solid var(--line); padding: 8px 16px; }
+      nav.toc ol { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0; padding: 0; list-style: none; font-size: 13px; }
+      main { padding: 16px; min-width: 0; }
+      section { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 16px; margin-bottom: 16px; scroll-margin-top: 12px; }
+      h2 { font-size: 18px; margin: 0 0 12px; padding-left: 10px; border-left: 4px solid var(--accent); }
+      h3 { font-size: 15px; margin: 16px 0 8px; }
+      .table-wrap { overflow-x: auto; }
+      table { border-collapse: collapse; width: 100%; font-size: 13px; }
+      th, td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
+      thead th { background: var(--accent-soft); white-space: nowrap; }
+      tbody tr:nth-child(even) { background: #fafbfc; }
+      tbody tr:target { background: var(--mark); outline: 2px solid #e0b100; }
+      tbody th { font-weight: normal; white-space: nowrap; }
+      td ol { margin: 0; padding-left: 1.3em; }
+      #tbl-items td:nth-child(2), #tbl-items td:nth-child(8) { white-space: nowrap; }
+      @media (min-width: 1100px) {
+        .layout { grid-template-columns: 220px minmax(0, 1fr); }
+        nav.toc { border: 0; background: none; padding: 16px 0 16px 16px; }
+        nav.toc ol { position: sticky; top: 16px; flex-direction: column; background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; gap: 6px; }
+      }
+
+      /* ---------- screen preview ---------- */
+      .preview { margin: 0 0 8px; }
+      .review-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 8px 12px; border: 1px dashed #b0b9c4; border-radius: 8px; background: #fbfcfd; font-size: 12px; margin-bottom: 12px; }
+      .review-tag { background: #eef1f4; color: var(--muted); border-radius: 4px; padding: 1px 6px; }
+      .review-bar .check { display: inline-flex; align-items: center; gap: 4px; }
+      .sample-group { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+      .review-bar button, .review-bar select { font: inherit; padding: 2px 8px; width: auto; }
+      .review-bar input[type="checkbox"] { width: auto; margin: 0; }
+      .review-bar label { white-space: nowrap; }
+      .state-indicator output { font-weight: bold; color: var(--accent); }
+      .preview-body { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); }
+      @media (min-width: 1360px) { .preview-body { grid-template-columns: minmax(0, 1fr) 260px; } }
+      .screen { border: 1px solid #aeb8c4; border-radius: 10px; background: #fff; box-shadow: 0 2px 8px rgba(16, 24, 40, 0.08); overflow: hidden; }
+      .scr-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 12px; background: #2b3a4a; color: #fff; padding: 8px 14px; }
+      .scr-header p { margin: 0; }
+      .scr-title { font-weight: bold; font-size: 15px; }
+      .scr-user { font-size: 12px; }
+      .scr-messages { margin: 12px 14px 0; padding: 10px 12px; border-radius: 6px; font-size: 13px; }
+      .scr-messages.error { background: var(--error-soft); border: 1px solid #f1b5ae; color: var(--error); }
+      .scr-messages.info { background: var(--ok-soft); border: 1px solid #a8d8b9; color: var(--ok); }
+      .scr-messages p { margin: 0; font-weight: bold; }
+      .scr-messages ul { margin: 6px 0 0; padding-left: 1.2em; }
+      .scr-messages a { color: inherit; }
+      form { padding: 12px 14px 14px; }
+      fieldset { border: 1px solid var(--line); border-radius: 8px; margin: 0 0 12px; padding: 8px 12px 10px; min-width: 0; }
+      legend { font-weight: bold; padding: 0 4px; font-size: 13px; }
+      .grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px 16px; }
+      @media (min-width: 640px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      .row-2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 12px; }
+      @media (min-width: 640px) { .row-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      .field label, .field .label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 2px; }
+      .req { display: inline-block; margin-left: 6px; font-size: 10px; line-height: 1.4; background: var(--error); color: #fff; border-radius: 3px; padding: 0 4px; vertical-align: 1px; }
+      input, select, textarea { font: inherit; width: 100%; padding: 6px 8px; border: 1px solid #9aa5b1; border-radius: 4px; background: #fff; }
+      input:focus, select:focus, textarea:focus, button:focus-visible { outline: 2px solid #4c8bd6; outline-offset: 1px; }
+      [aria-invalid="true"] { border-color: var(--error); background: var(--error-soft); }
+      .readonly { display: block; min-height: 34px; padding: 6px 8px; border-radius: 4px; background: #eef1f4; }
+      .field-error { margin: 2px 0 0; color: var(--error); font-size: 12px; min-height: 0; }
+      .field-error:empty { display: none; }
+      .field-error .rule-ref { color: var(--muted); font-size: 11px; margin-left: 4px; }
+      .hint { margin: 2px 0 0; color: var(--muted); font-size: 11px; }
+      .lines-wrap, .table-wrap { overflow-x: auto; position: relative; }
+      table.lines { min-width: 600px; font-size: 13px; }
+      table.lines th, table.lines td { border-color: #e3e8ee; padding: 4px 6px; vertical-align: top; }
+      table.lines td.no { width: 36px; text-align: center; padding-top: 10px; }
+      table.lines input.code { width: 96px; }
+      table.lines input.qty { width: 72px; text-align: right; }
+      .num { text-align: right; white-space: nowrap; padding-top: 10px !important; }
+      .pname { padding-top: 10px !important; }
+      .totals dl { margin: 0; }
+      .totals dl div { display: flex; justify-content: space-between; gap: 8px; padding: 3px 0; border-bottom: 1px dotted var(--line); }
+      .totals dt { font-size: 12px; }
+      .totals dd { margin: 0; font-variant-numeric: tabular-nums; }
+      .totals .grand dd { font-weight: bold; font-size: 16px; }
+      button { font: inherit; cursor: pointer; white-space: nowrap; }
+      button:disabled { cursor: not-allowed; opacity: 0.45; }
+      .btn-primary, .btn-secondary { padding: 7px 18px; border-radius: 6px; border: 1px solid var(--accent); }
+      .btn-primary { background: var(--accent); color: #fff; }
+      .btn-secondary { background: #fff; color: var(--accent); }
+      .btn-small { padding: 3px 10px; border-radius: 4px; border: 1px solid #9aa5b1; background: #fff; font-size: 12px; margin-top: 6px; }
+      .scr-buttons { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px; padding-top: 4px; }
+      .busy { color: var(--accent); font-weight: bold; }
+      .confirm-note { margin: 0 0 10px; padding: 8px 10px; border-radius: 6px; background: var(--accent-soft); font-size: 13px; }
+      .confirm-note.approval { background: var(--mark); }
+      .confirm-list { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 16px; margin: 0 0 12px; font-size: 13px; }
+      .confirm-list dt { color: var(--muted); }
+      .confirm-list dd { margin: 0; overflow-wrap: anywhere; }
+      .done { text-align: center; padding: 20px 8px; }
+      .done .order-no { font-size: 20px; font-weight: bold; letter-spacing: 0.04em; }
+      .event-log { border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; background: #fbfcfd; font-size: 12px; align-self: start; }
+      .log-title { margin: 0 0 4px; font-weight: bold; }
+      .log-title span { font-weight: normal; color: var(--muted); }
+      .event-log ol { margin: 0; padding-left: 1.4em; max-height: 360px; overflow-y: auto; }
+      .event-log li { padding: 1px 0; }
+      .event-log li.ng { color: var(--error); }
+      .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+      /* Spec ID overlay: 項目IDと領域を表示 */
+      .spec-badge { display: none; }
+      .show-ids .spec-badge { display: inline-block; margin-left: 4px; padding: 0 4px; border-radius: 3px; background: #6b3fa0; color: #fff; font: 10px/1.5 ui-monospace, Consolas, monospace; text-decoration: none; vertical-align: 1px; }
+      .show-ids [data-area] { position: relative; outline: 2px dashed #6b3fa0; outline-offset: -2px; }
+      .show-ids [data-area]::after { content: attr(data-area); position: absolute; top: 0; right: 0; background: #6b3fa0; color: #fff; font: 10px/1.6 ui-monospace, Consolas, monospace; padding: 0 5px; border-bottom-left-radius: 4px; }
+      footer { text-align: center; color: var(--muted); font-size: 12px; padding: 8px 16px 24px; }
+      @media print {
+        body { background: #fff; }
+        .review-bar, .event-log, nav.toc { display: none; }
+        .layout { display: block; }
+        section { break-inside: avoid-page; border: 0; padding: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="doc-header">
+      <p class="system">{{SYSTEM}}</p>
+      <h1>{{DOC_TITLE}}</h1>
+      <ul class="doc-meta">
+        <li>画面ID：<span class="id">{{SCREEN_ID}}</span></li>
+        <li>版数：{{VERSION}}</li>
+        <li>更新日：{{UPDATED}}</li>
+      </ul>
+      <p class="disclaimer">{{DISCLAIMER}}</p>
+    </header>
+    <div class="layout">
+      <nav class="toc" aria-label="目次">
+        <ol>
+          <li><a href="#overview">1. 概要</a></li>
+          <li><a href="#revisions">2. 改訂履歴</a></li>
+          <li><a href="#layout">3. 画面レイアウト</a></li>
+          <li><a href="#items">4. 項目定義</a></li>
+          <li><a href="#events">5. イベント定義</a></li>
+          <li><a href="#validations">6. 入力チェック</a></li>
+          <li><a href="#rules">7. 業務ルール</a></li>
+          <li><a href="#messages">8. メッセージ</a></li>
+          <li><a href="#states">9. 画面状態</a></li>
+          <li><a href="#testdata">10. テストデータ</a></li>
+        </ol>
+      </nav>
+      <main>
+<!--SECTIONS-->
+      </main>
+    </div>
+    <footer>このファイルは単体で動作します（外部ライブラリ・通信なし）。画面プレビューのデータとルールは、本書の表から読み込みます。</footer>
+    <script>
+      (() => {
+        "use strict";
+        const $ = (s, r = document) => r.querySelector(s);
+        const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+        // ---- Spec data: read from this document's own tables (single source inside the file)
+        const tableRows = (id) => $$(`#${id} tbody tr`).map((tr) => [...tr.cells].map((c) => c.textContent.trim()));
+        const customers = new Map(tableRows("tbl-td-customers").map(([code, name, status]) => [code, { name, status }]));
+        const products = new Map(tableRows("tbl-td-products").map(([code, name, price]) => [code, { name, price: Number(price.replace(/,/g, "")) }]));
+        const users = new Map(tableRows("tbl-td-users").map(([code, name, role]) => [code, { name, role }]));
+        const param = (id, key) => document.getElementById(id).dataset[key];
+        const itemName = (id) => document.getElementById(id).cells[3].textContent.trim();
+        const stateName = (id) => document.getElementById(id).cells[1].textContent.trim();
+        const msg = (id, ...args) => document.getElementById(id).querySelector(".msg-text").textContent.replace(/\{(\d)\}/g, (_, i) => args[Number(i)]);
+
+        const CUSTOMER_RE = new RegExp(param("VR-04", "pattern"));
+        const PRODUCT_RE = new RegExp(param("VR-12", "pattern"));
+        const QTY_MIN = Number(param("VR-15", "min"));
+        const QTY_MAX = Number(param("VR-15", "max"));
+        const REMARKS_MAX = Number(param("VR-18", "max"));
+        const APPROVAL_THRESHOLD = Number(param("BR-002", "threshold"));
+        const TAX_PERCENT = Math.round(Number(param("BR-006", "rate")) * 100);
+        const MAX_LINES = 5; // EV-05 / BTN-01
+        const yen = (n) => n.toLocaleString("ja-JP");
+
+        // ---- Elements
+        const screen = $("#screen");
+        const f = {
+          orderDate: $("#f-orderDate"), customer: $("#f-customer"), customerName: $("#f-customerName"),
+          delivery: $("#f-delivery"), payment: $("#f-payment"), approver: $("#f-approver"), remarks: $("#f-remarks"),
+        };
+        const linesBody = $("#lines");
+        const btn = { add: $("#btn-addLine"), clear: $("#btn-clear"), confirm: $("#btn-confirm"), back: $("#btn-back"), register: $("#btn-register"), next: $("#btn-new") };
+        let currentUser = "U001";
+        let pristine = true;
+        let lineSeq = 0;
+        let orderSeq = 0;
+        const errors = new Map(); // key -> {vr, msgId, text, target}
+
+        for (const [code, u] of users) {
+          if (u.role === "営業マネージャー") f.approver.add(new Option(`${u.name}（${code}）`, code));
+        }
+
+        // ---- Event log
+        const logList = $("#event-log");
+        function log(text, ng = false) {
+          const li = document.createElement("li");
+          li.textContent = text;
+          if (ng) li.className = "ng";
+          logList.prepend(li);
+        }
+
+        // ---- Validators: each returns null (OK) or {vr, msgId, args}
+        const err = (vr, msgId, ...args) => ({ vr, msgId, args });
+        const isDate = (v) => {
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return false;
+          const [y, m, d] = v.split("-").map(Number);
+          const dt = new Date(Date.UTC(y, m - 1, d));
+          return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+        };
+        const V = {
+          orderDate: (v) => (!v ? err("VR-01", "MSG-E001", itemName("ITM-03")) : !isDate(v) ? err("VR-02", "MSG-E002", itemName("ITM-03"), "YYYY-MM-DD") : null),
+          customer: (v) => {
+            if (!v) return err("VR-03", "MSG-E001", itemName("ITM-04"));
+            if (!CUSTOMER_RE.test(v)) return err("VR-04", "MSG-E002", itemName("ITM-04"), param("VR-04", "formatLabel"));
+            const c = customers.get(v);
+            if (!c) return err("VR-05", "MSG-E003", itemName("ITM-04"));
+            if (c.status === "取引停止") return err("VR-06", "MSG-E004");
+            return null;
+          },
+          delivery: (v) => {
+            if (!v) return err("VR-07", "MSG-E001", itemName("ITM-06"));
+            if (!isDate(v)) return err("VR-08", "MSG-E002", itemName("ITM-06"), "YYYY-MM-DD");
+            const od = f.orderDate.value.trim();
+            if (isDate(od) && v <= od) return err("VR-09", "MSG-E005");
+            return null;
+          },
+          payment: (v) => (!v ? err("VR-10", "MSG-E001", itemName("ITM-07")) : null),
+          code: (v) => (!v ? err("VR-11", "MSG-E001", itemName("ITM-08")) : !PRODUCT_RE.test(v) ? err("VR-12", "MSG-E002", itemName("ITM-08"), param("VR-12", "formatLabel")) : !products.has(v) ? err("VR-13", "MSG-E003", itemName("ITM-08")) : null),
+          qty: (v) => {
+            if (!v) return err("VR-14", "MSG-E001", itemName("ITM-10"));
+            const n = Number(v);
+            return /^\d+$/.test(v) && n >= QTY_MIN && n <= QTY_MAX ? null : err("VR-15", "MSG-E006");
+          },
+          approver: (v) => (needsApproval() && !v ? err("VR-16", "MSG-E007") : v && v === currentUser ? err("VR-17", "MSG-E008") : null),
+          remarks: (v) => ([...v].length > REMARKS_MAX ? err("VR-18", "MSG-E009") : null),
+        };
+
+        function show(key, input, errorEl, result) {
+          if (result) {
+            const text = msg(result.msgId, ...result.args);
+            errorEl.innerHTML = "";
+            errorEl.append(text);
+            const ref = document.createElement("span");
+            ref.className = "rule-ref";
+            ref.textContent = `[${result.vr} / ${result.msgId}]`;
+            errorEl.append(ref);
+            input.setAttribute("aria-invalid", "true");
+            errors.set(key, { ...result, text, target: input });
+          } else {
+            errorEl.textContent = "";
+            input.removeAttribute("aria-invalid");
+            errors.delete(key);
+          }
+        }
+        function check(name) {
+          const input = f[name];
+          const res = V[name](input.value.trim());
+          show(name, input, $(`#e-${name}`), res);
+          return res;
+        }
+        function checkLine(tr, kind) {
+          const input = $(`input.${kind}`, tr);
+          const res = V[kind](input.value.trim());
+          show(`${kind}-${tr.dataset.uid}`, input, input.nextElementSibling, res);
+          return res;
+        }
+
+        // ---- Lines (A-04)
+        function addLine(code = "", qty = "1") {
+          const tr = $("#line-template").content.firstElementChild.cloneNode(true);
+          tr.dataset.uid = String(++lineSeq);
+          const codeIn = $("input.code", tr);
+          const qtyIn = $("input.qty", tr);
+          codeIn.value = code;
+          qtyIn.value = qty;
+          codeIn.addEventListener("focusout", () => onCodeOut(tr));
+          qtyIn.addEventListener("focusout", () => onQtyOut(tr));
+          $("button.del", tr).addEventListener("click", () => {
+            const no = $(".no", tr).textContent;
+            for (const k of ["code", "qty"]) errors.delete(`${k}-${tr.dataset.uid}`);
+            tr.remove();
+            renumber();
+            recalc();
+            log(`EV-06 行削除：明細${no}を削除し再計算`);
+            touch();
+          });
+          linesBody.append(tr);
+          renumber();
+          return tr;
+        }
+        function renumber() {
+          const rows = $$("tr", linesBody);
+          rows.forEach((tr, i) => {
+            $(".no", tr).textContent = String(i + 1);
+            $("input.code", tr).setAttribute("aria-label", `明細${i + 1} 商品コード`);
+            $("input.qty", tr).setAttribute("aria-label", `明細${i + 1} 数量`);
+            $("button.del", tr).setAttribute("aria-label", `明細${i + 1}を削除`);
+            $("button.del", tr).disabled = rows.length <= 1;
+          });
+          btn.add.disabled = rows.length >= MAX_LINES;
+        }
+        function lineProduct(tr) {
+          const code = $("input.code", tr).value.trim();
+          return PRODUCT_RE.test(code) ? products.get(code) : undefined;
+        }
+        function onCodeOut(tr) {
+          const res = checkLine(tr, "code");
+          const p = res ? undefined : lineProduct(tr);
+          $(".pname", tr).textContent = p ? p.name : "";
+          $(".price", tr).textContent = p ? yen(p.price) : "";
+          recalc();
+          log(`EV-03 商品コード確定（明細${$(".no", tr).textContent}）：${res ? `${res.vr} NG（${res.msgId}）` : "VR-11〜VR-13 OK、商品名・単価を表示"}`, !!res);
+          touch();
+        }
+        function onQtyOut(tr) {
+          const res = checkLine(tr, "qty");
+          recalc();
+          log(`EV-04 数量変更（明細${$(".no", tr).textContent}）：${res ? `${res.vr} NG（${res.msgId}）` : "VR-14・VR-15 OK、BR-006 で再計算"}`, !!res);
+          touch();
+        }
+
+        // ---- Totals (A-05), BR-002 / BR-006
+        let total = 0;
+        function totals() {
+          let subtotal = 0;
+          for (const tr of $$("tr", linesBody)) {
+            const p = lineProduct(tr);
+            const q = $("input.qty", tr).value.trim();
+            const ok = p && !V.qty(q);
+            const amount = ok ? p.price * Number(q) : 0;
+            $(".amount", tr).textContent = ok ? yen(amount) : "";
+            subtotal += amount;
+          }
+          const tax = Math.floor((subtotal * TAX_PERCENT) / 100);
+          return { subtotal, tax, total: subtotal + tax };
+        }
+        function needsApproval() {
+          return total >= APPROVAL_THRESHOLD;
+        }
+        function recalc() {
+          const t = totals();
+          const before = needsApproval();
+          total = t.total;
+          $("#f-subtotal").textContent = yen(t.subtotal);
+          $("#f-tax").textContent = yen(t.tax);
+          $("#f-total").textContent = yen(t.total);
+          $("#approver-req").hidden = !needsApproval();
+          if (before !== needsApproval()) {
+            log(`BR-002 判定：合計 ${yen(total)}円 → 承認者は${needsApproval() ? "必須" : "任意"}`);
+            if (errors.has("approver") || f.approver.value) check("approver");
+          }
+        }
+
+        // ---- BR-004: confirm button
+        function requiredFilled() {
+          const base = ["orderDate", "customer", "delivery", "payment"].every((k) => f[k].value.trim() !== "");
+          const lines = $$("tr", linesBody).every((tr) => $("input.code", tr).value.trim() && $("input.qty", tr).value.trim());
+          return base && lines && (!needsApproval() || f.approver.value !== "");
+        }
+        function updateConfirm() {
+          btn.confirm.disabled = !(requiredFilled() && errors.size === 0);
+        }
+
+        // ---- States
+        function setState(id) {
+          screen.dataset.state = id;
+          $("#demo-state").value = `${id} ${stateName(id)}`;
+          const input = ["ST-01", "ST-02", "ST-03"].includes(id);
+          const confirm = id === "ST-04" || id === "ST-05";
+          $("#view-input").hidden = !input;
+          $("#view-confirm").hidden = !confirm;
+          $("#view-done").hidden = id !== "ST-06";
+          btn.clear.hidden = btn.confirm.hidden = !input;
+          for (const b of $$(".scr-buttons .spec-badge")) b.hidden = !input;
+          btn.back.hidden = btn.register.hidden = !confirm;
+          btn.back.disabled = btn.register.disabled = id === "ST-05";
+          btn.next.hidden = id !== "ST-06";
+          $("#busy").hidden = id !== "ST-05";
+          if (input) updateConfirm();
+        }
+        function touch() {
+          pristine = false;
+          if (errors.size === 0) hideMessages();
+          setState(errors.size ? "ST-03" : "ST-02");
+        }
+        function hideMessages() {
+          const box = $("#scr-messages");
+          box.hidden = true;
+          box.className = "scr-messages";
+          box.innerHTML = "";
+        }
+        function showErrorsSummary(list) {
+          const box = $("#scr-messages");
+          box.className = "scr-messages error";
+          box.innerHTML = "";
+          const p = document.createElement("p");
+          p.textContent = msg("MSG-E011", String(list.length));
+          const ul = document.createElement("ul");
+          for (const e of list) {
+            const li = document.createElement("li");
+            const a = document.createElement("a");
+            a.href = "#";
+            a.textContent = e.text;
+            a.addEventListener("click", (ev) => {
+              ev.preventDefault();
+              e.target.focus();
+            });
+            li.append(a);
+            ul.append(li);
+          }
+          box.append(p, ul);
+          box.hidden = false;
+        }
+
+        // ---- EV-01 / EV-10 / EV-12: initial state
+        function today() {
+          const d = new Date();
+          return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+        }
+        function init() {
+          errors.clear();
+          for (const k of ["customer", "delivery", "payment", "approver", "remarks"]) f[k].value = "";
+          f.orderDate.value = today();
+          f.customerName.textContent = "";
+          $("#f-orderNo").textContent = "（登録時に採番）";
+          for (const el of $$(".field-error", $("#view-input"))) el.textContent = "";
+          for (const el of $$("[aria-invalid]")) el.removeAttribute("aria-invalid");
+          linesBody.innerHTML = "";
+          addLine();
+          recalc();
+          $("#remarks-count").textContent = `0 / ${REMARKS_MAX}文字`;
+          hideMessages();
+          pristine = true;
+          setState("ST-01");
+          log("EV-01 画面初期表示：受注日＝システム日付、数量＝1、確認ボタン非活性");
+        }
+
+        // ---- Field events
+        f.orderDate.addEventListener("focusout", () => {
+          const r = check("orderDate");
+          if (f.delivery.value.trim()) check("delivery");
+          log(`受注日 チェック：${r ? `${r.vr} NG（${r.msgId}）` : "VR-01・VR-02 OK"}`, !!r);
+          touch();
+        });
+        f.customer.addEventListener("focusout", () => {
+          const r = check("customer");
+          f.customerName.textContent = r ? "" : customers.get(f.customer.value.trim()).name;
+          log(`EV-02 顧客コード確定：${r ? `${r.vr} NG（${r.msgId}）` : "VR-04〜VR-06 OK、顧客名を表示"}`, !!r);
+          touch();
+        });
+        f.delivery.addEventListener("focusout", () => {
+          const r = check("delivery");
+          log(`希望納期 チェック：${r ? `${r.vr} NG（${r.msgId}）` : "VR-07〜VR-09 OK"}`, !!r);
+          touch();
+        });
+        f.payment.addEventListener("change", () => {
+          const r = check("payment");
+          log(`支払条件 チェック：${r ? `${r.vr} NG（${r.msgId}）` : "VR-10 OK"}`, !!r);
+          touch();
+        });
+        f.approver.addEventListener("change", () => {
+          const r = check("approver");
+          log(`EV-07 承認者変更：${r ? `${r.vr} NG（${r.msgId}）` : "VR-16・VR-17 OK"}`, !!r);
+          touch();
+        });
+        f.remarks.addEventListener("input", () => {
+          $("#remarks-count").textContent = `${[...f.remarks.value].length} / ${REMARKS_MAX}文字`;
+        });
+        f.remarks.addEventListener("focusout", () => {
+          const r = check("remarks");
+          if (r) log(`備考 チェック：${r.vr} NG（${r.msgId}）`, true);
+          touch();
+        });
+        $("#order-form").addEventListener("input", () => {
+          if (!pristine || screen.dataset.state === "ST-01") updateConfirm();
+        });
+        $("#order-form").addEventListener("change", updateConfirm);
+        btn.add.addEventListener("click", () => {
+          addLine();
+          log(`EV-05 行追加：明細${$$("tr", linesBody).length}行`);
+          touch();
+        });
+
+        // ---- EV-08 確認
+        btn.confirm.addEventListener("click", () => {
+          for (const k of ["orderDate", "customer", "delivery", "payment", "approver", "remarks"]) check(k);
+          for (const tr of $$("tr", linesBody)) {
+            checkLine(tr, "code");
+            checkLine(tr, "qty");
+          }
+          recalc();
+          const list = [...errors.values()];
+          if (total <= 0) list.push({ vr: "VR-19", msgId: "MSG-E010", text: msg("MSG-E010"), target: $("input.code", linesBody) });
+          if (list.length) {
+            showErrorsSummary(list);
+            setState("ST-03");
+            btn.confirm.disabled = true;
+            log(`EV-08 確認：エラー ${list.length}件（${list.map((e) => e.vr).join("、")}）`, true);
+            if (total <= 0 && errors.size === 0) btn.confirm.disabled = false;
+            return;
+          }
+          renderConfirm();
+          hideMessages();
+          setState("ST-04");
+          log("EV-08 確認：VR-01〜VR-19 OK → 確認画面");
+        });
+
+        function renderConfirm() {
+          const view = $("#view-confirm");
+          view.innerHTML = "";
+          const note = document.createElement("p");
+          note.className = "confirm-note" + (needsApproval() ? " approval" : "");
+          note.textContent = needsApproval()
+            ? `合計金額が${yen(APPROVAL_THRESHOLD)}円以上のため、登録後は承認待ちになります（承認者：${users.get(f.approver.value).name}）。`
+            : "以下の内容で登録します。内容を確認してください。";
+          const dl = document.createElement("dl");
+          dl.className = "confirm-list";
+          const pay = f.payment.selectedOptions[0].textContent;
+          const pairs = [
+            [itemName("ITM-03"), f.orderDate.value],
+            [itemName("ITM-04"), `${f.customer.value}　${f.customerName.textContent}`],
+            [itemName("ITM-06"), f.delivery.value],
+            [itemName("ITM-07"), pay],
+            ...$$("tr", linesBody).map((tr, i) => [`明細${i + 1}`, `${$("input.code", tr).value}　${$(".pname", tr).textContent}　× ${$("input.qty", tr).value}　${$(".amount", tr).textContent}円`]),
+            [itemName("ITM-13"), `${$("#f-subtotal").textContent}円`],
+            [itemName("ITM-14"), `${$("#f-tax").textContent}円`],
+            [itemName("ITM-15"), `${$("#f-total").textContent}円`],
+            [itemName("ITM-16"), f.approver.value ? users.get(f.approver.value).name : "—"],
+            [itemName("ITM-17"), f.remarks.value || "—"],
+          ];
+          for (const [k, v] of pairs) {
+            const dt = document.createElement("dt");
+            const dd = document.createElement("dd");
+            dt.textContent = k;
+            dd.textContent = v;
+            dl.append(dt, dd);
+          }
+          view.append(note, dl);
+        }
+        btn.back.addEventListener("click", () => {
+          setState("ST-02");
+          log("EV-09 戻る：入力値を保持して入力画面へ");
+        });
+        btn.register.addEventListener("click", () => {
+          setState("ST-05");
+          log("EV-11 登録：ST-05 登録処理中（全ボタン非活性）");
+          setTimeout(() => {
+            const no = `ORD-${f.orderDate.value.replace(/-/g, "")}-${String(++orderSeq).padStart(4, "0")}`;
+            const approval = needsApproval();
+            const text = approval ? msg("MSG-I002", no, users.get(f.approver.value).name) : msg("MSG-I001", no);
+            $("#f-orderNo").textContent = no;
+            const view = $("#view-done");
+            view.innerHTML = "";
+            const wrap = document.createElement("div");
+            wrap.className = "done";
+            const p = document.createElement("p");
+            p.textContent = itemName("ITM-02");
+            const n = document.createElement("p");
+            n.className = "order-no";
+            n.id = "done-order-no";
+            n.textContent = no;
+            const s = document.createElement("p");
+            s.textContent = `ステータス：${approval ? "承認待ち" : "受注確定"}`;
+            wrap.append(p, n, s);
+            view.append(wrap);
+            const box = $("#scr-messages");
+            box.className = "scr-messages info";
+            box.innerHTML = "";
+            const m = document.createElement("p");
+            m.textContent = text;
+            box.append(m);
+            box.hidden = false;
+            setState("ST-06");
+            log(`EV-11 登録完了：${no}（BR-002 ${approval ? "該当 → 承認待ち、MSG-I002" : "非該当 → 受注確定、MSG-I001"}）`);
+          }, 600);
+        });
+        btn.clear.addEventListener("click", () => {
+          if (window.confirm(msg("MSG-Q001"))) {
+            log("EV-10 クリア：MSG-Q001 OK");
+            init();
+          }
+        });
+        btn.next.addEventListener("click", () => {
+          log("EV-12 新規受注");
+          init();
+        });
+
+        // ---- Review bar (outside the spec)
+        $("#demo-user").addEventListener("change", (e) => {
+          currentUser = e.target.value;
+          const u = users.get(currentUser);
+          $("#f-user").textContent = `${u.name}（${currentUser}）`;
+          log(`[デモ] ログインユーザーを ${u.name} に切替`);
+          if (f.approver.value) check("approver");
+          if (!pristine) touch();
+        });
+        $("#demo-ids").addEventListener("change", (e) => screen.classList.toggle("show-ids", e.target.checked));
+        const addDays = (iso, n) => {
+          const [y, m, d] = iso.split("-").map(Number);
+          const dt = new Date(Date.UTC(y, m - 1, d + n));
+          return dt.toISOString().slice(0, 10);
+        };
+        const SAMPLES = {
+          normal: { customer: "C00001", delivery: 7, payment: "01", lines: [["P-1002", "3"], ["P-2001", "1"]] },
+          approval: { customer: "C00002", delivery: 14, payment: "01", lines: [["P-1001", "7"]] },
+          error: { customer: "C00099", delivery: 0, payment: "", lines: [["P-12", "0"]] },
+        };
+        for (const b of $$("[data-sample]")) {
+          b.addEventListener("click", () => {
+            const s = SAMPLES[b.dataset.sample];
+            init();
+            f.customer.value = s.customer;
+            f.delivery.value = addDays(f.orderDate.value, s.delivery);
+            f.payment.value = s.payment;
+            linesBody.innerHTML = "";
+            for (const [c, q] of s.lines) addLine(c, q);
+            log(`[デモ] サンプル入力「${b.textContent}」`);
+            f.customer.dispatchEvent(new Event("focusout"));
+            f.delivery.dispatchEvent(new Event("focusout"));
+            if (s.payment) f.payment.dispatchEvent(new Event("change"));
+            for (const tr of $$("tr", linesBody)) {
+              onCodeOut(tr);
+              onQtyOut(tr);
+            }
+            updateConfirm();
+          });
+        }
+
+        init();
+      })();
+    </script>
+  </body>
+</html>

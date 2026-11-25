@@ -1,0 +1,76 @@
+# Change: BR-002 threshold 1,000,000 → 500,000 (every occurrence)
+
+occurrences changed in order_design.md: 5
+occurrences changed in order_design.html: 6
+occurrences changed in order_design.xlsx: 5
+
+## git diff --stat
+
+ order_design.html |   8 ++++----
+ order_design.md   |   8 ++++----
+ order_design.xlsx | Bin 30561 -> 30407 bytes
+ 3 files changed, 8 insertions(+), 8 deletions(-)
+
+## git diff (no textconv), xlsx part
+
+diff --git a/order_design.xlsx b/order_design.xlsx
+index b6d1072..1d202f9 100644
+Binary files a/order_design.xlsx and b/order_design.xlsx differ
+
+## git diff -U0, md part
+
+diff --git a/order_design.md b/order_design.md
+index c117368..13137dc 100644
+--- a/order_design.md
++++ b/order_design.md
+@@ -41 +41 @@
+-[A-06 承認情報]　ITM-16 承認者 △ [▼ 選択してください]　△：合計金額（税込）1,000,000円以上で必須（BR-002）
++[A-06 承認情報]　ITM-16 承認者 △ [▼ 選択してください]　△：合計金額（税込）500,000円以上で必須（BR-002）
+@@ -125 +125 @@
+-| VR-16 | ITM-16 承認者 | 条件付き必須 | 合計金額（税込）が 1,000,000 円以上で未選択 | F, C | MSG-E007 | BR-002 |
++| VR-16 | ITM-16 承認者 | 条件付き必須 | 合計金額（税込）が 500,000 円以上で未選択 | F, C | MSG-E007 | BR-002 |
+@@ -135 +135 @@
+-| BR-002 | 高額受注の承認 | 合計金額（税込）が 1,000,000 円以上の受注は、営業マネージャーの承認を必須とする。承認者を選択して登録し、登録後のステータスは「承認待ち」とする。1,000,000 円未満の受注は「受注確定」とする。 | 閾値は税込金額で判定する。 | ITM-16, VR-16, EV-11 |
++| BR-002 | 高額受注の承認 | 合計金額（税込）が 500,000 円以上の受注は、営業マネージャーの承認を必須とする。承認者を選択して登録し、登録後のステータスは「承認待ち」とする。500,000 円未満の受注は「受注確定」とする。 | 閾値は税込金額で判定する。 | ITM-16, VR-16, EV-11 |
+@@ -153 +153 @@
+-| MSG-E007 | エラー | 合計金額が1,000,000円以上のため、承認者を選択してください。 | — |
++| MSG-E007 | エラー | 合計金額が500,000円以上のため、承認者を選択してください。 | — |
+
+## git diff -U0, html part
+
+diff --git a/order_design.html b/order_design.html
+index b3bdbca..c501896 100644
+--- a/order_design.html
++++ b/order_design.html
+@@ -315 +315 @@
+-                <p class="hint" id="approver-hint">合計金額（税込）1,000,000円以上の場合に必須</p>
++                <p class="hint" id="approver-hint">合計金額（税込）500,000円以上の場合に必須</p>
+@@ -470 +470 @@
+-<tr id="VR-16"><th scope="row">VR-16</th><td><a href="#ITM-16">ITM-16</a> 承認者</td><td>条件付き必須</td><td>合計金額（税込）が 1,000,000 円以上で未選択</td><td>F, C</td><td><a href="#MSG-E007">MSG-E007</a></td><td><a href="#BR-002">BR-002</a></td></tr>
++<tr id="VR-16"><th scope="row">VR-16</th><td><a href="#ITM-16">ITM-16</a> 承認者</td><td>条件付き必須</td><td>合計金額（税込）が 500,000 円以上で未選択</td><td>F, C</td><td><a href="#MSG-E007">MSG-E007</a></td><td><a href="#BR-002">BR-002</a></td></tr>
+@@ -484 +484 @@
+-<tr id="BR-002" data-threshold="1000000"><th scope="row">BR-002</th><td>高額受注の承認</td><td>合計金額（税込）が 1,000,000 円以上の受注は、営業マネージャーの承認を必須とする。承認者を選択して登録し、登録後のステータスは「承認待ち」とする。1,000,000 円未満の受注は「受注確定」とする。</td><td>閾値は税込金額で判定する。</td><td><a href="#ITM-16">ITM-16</a>, <a href="#VR-16">VR-16</a>, <a href="#EV-11">EV-11</a></td></tr>
++<tr id="BR-002" data-threshold="500000"><th scope="row">BR-002</th><td>高額受注の承認</td><td>合計金額（税込）が 500,000 円以上の受注は、営業マネージャーの承認を必須とする。承認者を選択して登録し、登録後のステータスは「承認待ち」とする。500,000 円未満の受注は「受注確定」とする。</td><td>閾値は税込金額で判定する。</td><td><a href="#ITM-16">ITM-16</a>, <a href="#VR-16">VR-16</a>, <a href="#EV-11">EV-11</a></td></tr>
+@@ -506 +506 @@
+-<tr id="MSG-E007"><th scope="row">MSG-E007</th><td>エラー</td><td class="msg-text">合計金額が1,000,000円以上のため、承認者を選択してください。</td><td>—</td></tr>
++<tr id="MSG-E007"><th scope="row">MSG-E007</th><td>エラー</td><td class="msg-text">合計金額が500,000円以上のため、承認者を選択してください。</td><td>—</td></tr>
+
+## git diff -U0 with textconv (structured text of each sheet), xlsx part
+
+diff --git a/order_design.xlsx b/order_design.xlsx
+index b6d1072..1d202f9 100644
+--- a/order_design.xlsx
++++ b/order_design.xlsx
+@@ -44 +44 @@ A-06 承認情報
+-ITM-16 承認者 △ | ▼ 選択してください | △：合計金額（税込）1,000,000円以上で必須（BR-002）
++ITM-16 承認者 △ | ▼ 選択してください | △：合計金額（税込）500,000円以上で必須（BR-002）
+@@ -126 +126 @@ VR-15 | ITM-10 数量 | 範囲 | 整数でない、または 1〜9,999 の範囲
+-VR-16 | ITM-16 承認者 | 条件付き必須 | 合計金額（税込）が 1,000,000 円以上で未選択 | F, C | MSG-E007 | BR-002
++VR-16 | ITM-16 承認者 | 条件付き必須 | 合計金額（税込）が 500,000 円以上で未選択 | F, C | MSG-E007 | BR-002
+@@ -136 +136 @@ BR-001 | 合計金額の下限 | 合計金額（税込）が 0 円以下の受
+-BR-002 | 高額受注の承認 | 合計金額（税込）が 1,000,000 円以上の受注は、営業マネージャーの承認を必須とする。承認者を選択して登録し、登録後のステータスは「承認待ち」とする。1,000,000 円未満の受注は「受注確定」とする。 | 閾値は税込金額で判定する。 | ITM-16, VR-16, EV-11
++BR-002 | 高額受注の承認 | 合計金額（税込）が 500,000 円以上の受注は、営業マネージャーの承認を必須とする。承認者を選択して登録し、登録後のステータスは「承認待ち」とする。500,000 円未満の受注は「受注確定」とする。 | 閾値は税込金額で判定する。 | ITM-16, VR-16, EV-11
+@@ -154 +154 @@ MSG-E006 | エラー | 数量は1〜9,999の整数で入力してください。
+-MSG-E007 | エラー | 合計金額が1,000,000円以上のため、承認者を選択してください。 | —
++MSG-E007 | エラー | 合計金額が500,000円以上のため、承認者を選択してください。 | —
+

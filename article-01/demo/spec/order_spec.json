@@ -1,0 +1,143 @@
+{
+  "meta": {
+    "system": "販売管理システム（デモ）",
+    "screenId": "SCR-ORD-001",
+    "screenName": "受注登録画面",
+    "documentTitle": "受注登録画面 画面設計書",
+    "version": "1.0",
+    "updated": "2026-11-25",
+    "author": "TechU Solutions（記事用デモ）",
+    "purpose": "営業担当者が顧客からの注文（受注）を登録する。合計金額が一定額以上の受注は、営業マネージャーの承認に回す。",
+    "actors": "営業担当者、営業マネージャー",
+    "entry": "メニュー「受注」→「受注登録」",
+    "disclaimer": "本書は技術記事のために作成した架空の業務仕様であり、実在のシステムや企業の仕様ではない。",
+    "legend": "必須：○＝必須、△＝条件付き必須、空欄＝任意または対象外。チェックタイミング：F＝フォーカスアウト時（選択項目は変更時）、C＝確認ボタン押下時。"
+  },
+  "revisions": [
+    { "version": "1.0", "date": "2026-11-25", "author": "TechU", "description": "初版作成" }
+  ],
+  "areas": [
+    { "id": "A-01", "name": "ヘッダー", "position": "上部・全幅", "items": "ITM-01", "description": "画面タイトルとログインユーザーを表示する。" },
+    { "id": "A-02", "name": "メッセージ", "position": "ヘッダー直下・全幅", "items": "—", "description": "エラー件数とエラー一覧、登録完了メッセージを表示する。通常時は非表示。" },
+    { "id": "A-03", "name": "受注基本情報", "position": "上段", "items": "ITM-02〜ITM-07", "description": "受注番号、受注日、顧客、希望納期、支払条件を入力する。" },
+    { "id": "A-04", "name": "受注明細", "position": "中段", "items": "ITM-08〜ITM-12、BTN-01、BTN-02", "description": "商品明細を1〜5行入力する。" },
+    { "id": "A-05", "name": "金額集計", "position": "中段・右寄せ", "items": "ITM-13〜ITM-15", "description": "小計、消費税、合計金額（税込）を自動計算して表示する。" },
+    { "id": "A-06", "name": "承認情報", "position": "下段", "items": "ITM-16", "description": "承認者を選択する。BR-002 に該当する場合のみ必須。" },
+    { "id": "A-07", "name": "備考", "position": "下段", "items": "ITM-17", "description": "受注に関する補足を入力する。" },
+    { "id": "A-08", "name": "ボタン", "position": "最下部・右寄せ", "items": "BTN-03〜BTN-07", "description": "画面状態に応じたボタンを表示する。" }
+  ],
+  "items": [
+    { "id": "ITM-01", "area": "A-01", "name": "ログインユーザー", "io": "表示", "type": "文字列", "length": "30", "required": "", "default": "ログイン中の社員", "format": "「氏名（社員コード）」で表示", "related": "BR-003" },
+    { "id": "ITM-02", "area": "A-03", "name": "受注番号", "io": "表示", "type": "文字列", "length": "17", "required": "", "default": "空欄", "format": "登録完了時に採番（ORD-YYYYMMDD-NNNN）", "related": "EV-11" },
+    { "id": "ITM-03", "area": "A-03", "name": "受注日", "io": "入力", "type": "日付", "length": "10", "required": "○", "default": "システム日付", "format": "YYYY-MM-DD", "related": "VR-01, VR-02" },
+    { "id": "ITM-04", "area": "A-03", "name": "顧客コード", "io": "入力", "type": "文字列", "length": "6", "required": "○", "default": "空欄", "format": "「C」＋数字5桁（例：C00001）", "related": "VR-03〜VR-06, BR-007, EV-02" },
+    { "id": "ITM-05", "area": "A-03", "name": "顧客名", "io": "表示", "type": "文字列", "length": "50", "required": "", "default": "空欄", "format": "顧客コード確定時に顧客マスタから表示", "related": "EV-02" },
+    { "id": "ITM-06", "area": "A-03", "name": "希望納期", "io": "入力", "type": "日付", "length": "10", "required": "○", "default": "空欄", "format": "YYYY-MM-DD", "related": "VR-07〜VR-09, BR-005" },
+    { "id": "ITM-07", "area": "A-03", "name": "支払条件", "io": "選択", "type": "コード", "length": "2", "required": "○", "default": "未選択", "format": "01：月末締め翌月末払い／02：前払い／03：代金引換", "related": "VR-10" },
+    { "id": "ITM-08", "area": "A-04", "name": "商品コード", "io": "入力", "type": "文字列", "length": "6", "required": "○", "default": "空欄", "format": "「P-」＋数字4桁（例：P-1001）。明細行ごと", "related": "VR-11〜VR-13, EV-03" },
+    { "id": "ITM-09", "area": "A-04", "name": "商品名", "io": "表示", "type": "文字列", "length": "50", "required": "", "default": "空欄", "format": "商品コード確定時に商品マスタから表示", "related": "EV-03" },
+    { "id": "ITM-10", "area": "A-04", "name": "数量", "io": "入力", "type": "数値", "length": "4", "required": "○", "default": "1", "format": "整数 1〜9,999", "related": "VR-14, VR-15, EV-04" },
+    { "id": "ITM-11", "area": "A-04", "name": "単価", "io": "表示", "type": "数値（円）", "length": "9", "required": "", "default": "空欄", "format": "商品マスタの単価。画面では変更不可", "related": "BR-008" },
+    { "id": "ITM-12", "area": "A-04", "name": "金額", "io": "表示", "type": "数値（円）", "length": "10", "required": "", "default": "空欄", "format": "数量 × 単価", "related": "EV-04" },
+    { "id": "ITM-13", "area": "A-05", "name": "小計", "io": "表示", "type": "数値（円）", "length": "11", "required": "", "default": "0", "format": "明細金額の合計", "related": "BR-006" },
+    { "id": "ITM-14", "area": "A-05", "name": "消費税", "io": "表示", "type": "数値（円）", "length": "11", "required": "", "default": "0", "format": "小計 × 10%（1円未満切り捨て）", "related": "BR-006" },
+    { "id": "ITM-15", "area": "A-05", "name": "合計金額（税込）", "io": "表示", "type": "数値（円）", "length": "11", "required": "", "default": "0", "format": "小計 ＋ 消費税", "related": "BR-001, BR-002, VR-19" },
+    { "id": "ITM-16", "area": "A-06", "name": "承認者", "io": "選択", "type": "社員コード", "length": "4", "required": "△", "default": "未選択", "format": "営業マネージャーから選択（テストデータ参照）", "related": "VR-16, VR-17, BR-002, BR-003" },
+    { "id": "ITM-17", "area": "A-07", "name": "備考", "io": "入力", "type": "文字列", "length": "200", "required": "", "default": "空欄", "format": "200文字以内", "related": "VR-18" },
+    { "id": "BTN-01", "area": "A-04", "name": "行追加", "io": "ボタン", "type": "—", "length": "—", "required": "", "default": "活性", "format": "明細が5行のとき非活性", "related": "EV-05" },
+    { "id": "BTN-02", "area": "A-04", "name": "行削除", "io": "ボタン", "type": "—", "length": "—", "required": "", "default": "非活性", "format": "明細行ごとに表示。明細が1行のとき非活性", "related": "EV-06" },
+    { "id": "BTN-03", "area": "A-08", "name": "クリア", "io": "ボタン", "type": "—", "length": "—", "required": "", "default": "活性", "format": "入力画面（ST-01〜ST-03）で表示", "related": "EV-10" },
+    { "id": "BTN-04", "area": "A-08", "name": "確認", "io": "ボタン", "type": "—", "length": "—", "required": "", "default": "非活性", "format": "入力画面で表示。活性条件は BR-004", "related": "BR-004, EV-08" },
+    { "id": "BTN-05", "area": "A-08", "name": "戻る", "io": "ボタン", "type": "—", "length": "—", "required": "", "default": "—", "format": "確認画面（ST-04）でのみ表示", "related": "EV-09" },
+    { "id": "BTN-06", "area": "A-08", "name": "登録", "io": "ボタン", "type": "—", "length": "—", "required": "", "default": "—", "format": "確認画面（ST-04）でのみ表示", "related": "EV-11" },
+    { "id": "BTN-07", "area": "A-08", "name": "新規受注", "io": "ボタン", "type": "—", "length": "—", "required": "", "default": "—", "format": "登録完了（ST-06）でのみ表示", "related": "EV-12" }
+  ],
+  "events": [
+    { "id": "EV-01", "name": "画面初期表示", "trigger": "画面表示時", "condition": "—", "steps": ["受注日にシステム日付、明細1行目の数量に1を設定する。", "確認ボタンと行削除ボタンを非活性にする。"], "next": "ST-01" },
+    { "id": "EV-02", "name": "顧客コード確定", "trigger": "ITM-04 フォーカスアウト", "condition": "入力値あり", "steps": ["VR-04、VR-05、VR-06 を実行する。", "OK の場合、顧客マスタの顧客名を ITM-05 に表示する。", "NG の場合、ITM-05 を空欄にしてエラーを表示する。"], "next": "ST-02 または ST-03" },
+    { "id": "EV-03", "name": "商品コード確定", "trigger": "ITM-08 フォーカスアウト", "condition": "入力値あり", "steps": ["VR-12、VR-13 を実行する。", "OK の場合、商品名（ITM-09）と単価（ITM-11）を表示し、金額と集計を再計算する。"], "next": "ST-02 または ST-03" },
+    { "id": "EV-04", "name": "数量変更", "trigger": "ITM-10 フォーカスアウト", "condition": "—", "steps": ["VR-14、VR-15 を実行する。", "OK の場合、金額（ITM-12）と集計（ITM-13〜ITM-15）を再計算する（BR-006）。", "BR-002 を判定し、承認者の必須表示を切り替える。"], "next": "ST-02 または ST-03" },
+    { "id": "EV-05", "name": "行追加", "trigger": "BTN-01 押下", "condition": "明細が5行未満", "steps": ["明細の末尾に空の行を追加する（数量の初期値は1）。"], "next": "ST-02" },
+    { "id": "EV-06", "name": "行削除", "trigger": "BTN-02 押下", "condition": "明細が2行以上", "steps": ["対象行を削除し、集計を再計算する。"], "next": "ST-02" },
+    { "id": "EV-07", "name": "承認者変更", "trigger": "ITM-16 変更", "condition": "—", "steps": ["VR-16、VR-17 を実行する。"], "next": "ST-02 または ST-03" },
+    { "id": "EV-08", "name": "確認", "trigger": "BTN-04 押下", "condition": "BR-004 の活性条件を満たす", "steps": ["全項目に VR-01〜VR-19 を実行する。", "エラーなしの場合、確認画面に切り替える。", "エラーありの場合、A-02 に MSG-E011 とエラー一覧を表示する。"], "next": "ST-04 または ST-03" },
+    { "id": "EV-09", "name": "戻る", "trigger": "BTN-05 押下", "condition": "—", "steps": ["入力値を保持したまま入力画面に戻る。"], "next": "ST-02" },
+    { "id": "EV-10", "name": "クリア", "trigger": "BTN-03 押下", "condition": "—", "steps": ["MSG-Q001 で確認する。", "OK の場合、EV-01 と同じ初期状態に戻す。"], "next": "ST-01" },
+    { "id": "EV-11", "name": "登録", "trigger": "BTN-06 押下", "condition": "—", "steps": ["二重送信防止のため、全ボタンを非活性にする（ST-05）。", "受注番号を採番して登録する。", "BR-002 に該当する場合はステータス「承認待ち」で登録し MSG-I002 を表示する。それ以外は「受注確定」で登録し MSG-I001 を表示する。"], "next": "ST-05 → ST-06" },
+    { "id": "EV-12", "name": "新規受注", "trigger": "BTN-07 押下", "condition": "—", "steps": ["EV-01 と同じ初期状態に戻す。"], "next": "ST-01" }
+  ],
+  "validations": [
+    { "id": "VR-01", "item": "ITM-03", "check": "必須", "error": "未入力", "timing": "F, C", "message": "MSG-E001", "rule": "" },
+    { "id": "VR-02", "item": "ITM-03", "check": "日付形式", "error": "YYYY-MM-DD 形式の実在する日付でない", "timing": "F, C", "message": "MSG-E002", "rule": "" },
+    { "id": "VR-03", "item": "ITM-04", "check": "必須", "error": "未入力", "timing": "F, C", "message": "MSG-E001", "rule": "" },
+    { "id": "VR-04", "item": "ITM-04", "check": "形式", "error": "正規表現 ^C[0-9]{5}$ に一致しない", "timing": "F, C", "message": "MSG-E002", "rule": "", "params": { "pattern": "^C[0-9]{5}$", "formatLabel": "「C」＋数字5桁" } },
+    { "id": "VR-05", "item": "ITM-04", "check": "存在", "error": "顧客マスタに存在しない", "timing": "F, C", "message": "MSG-E003", "rule": "" },
+    { "id": "VR-06", "item": "ITM-04", "check": "取引状態", "error": "顧客の取引状態が「取引停止」", "timing": "F, C", "message": "MSG-E004", "rule": "BR-007" },
+    { "id": "VR-07", "item": "ITM-06", "check": "必須", "error": "未入力", "timing": "F, C", "message": "MSG-E001", "rule": "" },
+    { "id": "VR-08", "item": "ITM-06", "check": "日付形式", "error": "YYYY-MM-DD 形式の実在する日付でない", "timing": "F, C", "message": "MSG-E002", "rule": "" },
+    { "id": "VR-09", "item": "ITM-06", "check": "納期", "error": "受注日の翌日より前", "timing": "F, C", "message": "MSG-E005", "rule": "BR-005" },
+    { "id": "VR-10", "item": "ITM-07", "check": "必須", "error": "未選択", "timing": "F, C", "message": "MSG-E001", "rule": "" },
+    { "id": "VR-11", "item": "ITM-08", "check": "必須", "error": "未入力", "timing": "F, C", "message": "MSG-E001", "rule": "" },
+    { "id": "VR-12", "item": "ITM-08", "check": "形式", "error": "正規表現 ^P-[0-9]{4}$ に一致しない", "timing": "F, C", "message": "MSG-E002", "rule": "", "params": { "pattern": "^P-[0-9]{4}$", "formatLabel": "「P-」＋数字4桁" } },
+    { "id": "VR-13", "item": "ITM-08", "check": "存在", "error": "商品マスタに存在しない", "timing": "F, C", "message": "MSG-E003", "rule": "" },
+    { "id": "VR-14", "item": "ITM-10", "check": "必須", "error": "未入力", "timing": "F, C", "message": "MSG-E001", "rule": "" },
+    { "id": "VR-15", "item": "ITM-10", "check": "範囲", "error": "整数でない、または 1〜9,999 の範囲外", "timing": "F, C", "message": "MSG-E006", "rule": "", "params": { "min": "1", "max": "9999" } },
+    { "id": "VR-16", "item": "ITM-16", "check": "条件付き必須", "error": "合計金額（税込）が 1,000,000 円以上で未選択", "timing": "F, C", "message": "MSG-E007", "rule": "BR-002" },
+    { "id": "VR-17", "item": "ITM-16", "check": "本人承認の禁止", "error": "承認者がログインユーザー本人", "timing": "F, C", "message": "MSG-E008", "rule": "BR-003" },
+    { "id": "VR-18", "item": "ITM-17", "check": "文字数", "error": "201文字以上", "timing": "F, C", "message": "MSG-E009", "rule": "", "params": { "max": "200" } },
+    { "id": "VR-19", "item": "ITM-15", "check": "合計金額", "error": "合計金額（税込）が 0 円以下", "timing": "C", "message": "MSG-E010", "rule": "BR-001" }
+  ],
+  "businessRules": [
+    { "id": "BR-001", "name": "合計金額の下限", "rule": "合計金額（税込）が 0 円以下の受注は登録できない。", "note": "単価 0 円の商品（販促サンプル品）のみの受注が該当する。", "related": "VR-19" },
+    { "id": "BR-002", "name": "高額受注の承認", "rule": "合計金額（税込）が 1,000,000 円以上の受注は、営業マネージャーの承認を必須とする。承認者を選択して登録し、登録後のステータスは「承認待ち」とする。1,000,000 円未満の受注は「受注確定」とする。", "note": "閾値は税込金額で判定する。", "related": "ITM-16, VR-16, EV-11", "params": { "threshold": "1000000" } },
+    { "id": "BR-003", "name": "本人承認の禁止", "rule": "登録者（ログインユーザー）は自分自身を承認者にできない。", "note": "画面のチェックは補助である。最終的な権限チェックはサーバー側で行う（本デモの対象外）。", "related": "VR-17" },
+    { "id": "BR-004", "name": "確認ボタンの活性条件", "rule": "必須項目（条件付き必須を含む）がすべて入力済みで、エラー表示中の項目がない場合にのみ、確認ボタンを活性にする。押下時は全チェックを再実行し、すべて OK の場合にのみ確認画面へ進む。", "note": "VR-19 は確認ボタン押下時にのみ判定する。", "related": "BTN-04, EV-08" },
+    { "id": "BR-005", "name": "希望納期", "rule": "希望納期は受注日の翌日以降でなければならない。", "note": "営業日・休日の考慮は対象外。", "related": "VR-09" },
+    { "id": "BR-006", "name": "消費税の計算", "rule": "消費税は小計 × 10%（1円未満切り捨て）、合計金額（税込）は小計 ＋ 消費税とする。", "note": "軽減税率は対象外。", "related": "ITM-13〜ITM-15", "params": { "rate": "0.10" } },
+    { "id": "BR-007", "name": "取引停止顧客", "rule": "取引状態が「取引停止」の顧客の受注は登録できない。", "note": "", "related": "VR-06" },
+    { "id": "BR-008", "name": "単価の固定", "rule": "単価は商品マスタの値を使用し、画面では変更できない。", "note": "値引きは対象外。", "related": "ITM-11" }
+  ],
+  "messages": [
+    { "id": "MSG-E001", "type": "エラー", "text": "{0}を入力してください。", "params": "{0}＝項目名" },
+    { "id": "MSG-E002", "type": "エラー", "text": "{0}の形式が正しくありません。{1}で入力してください。", "params": "{0}＝項目名、{1}＝形式" },
+    { "id": "MSG-E003", "type": "エラー", "text": "入力された{0}は登録されていません。", "params": "{0}＝項目名" },
+    { "id": "MSG-E004", "type": "エラー", "text": "取引停止中の顧客のため、受注を登録できません。", "params": "—" },
+    { "id": "MSG-E005", "type": "エラー", "text": "希望納期は受注日の翌日以降の日付を入力してください。", "params": "—" },
+    { "id": "MSG-E006", "type": "エラー", "text": "数量は1〜9,999の整数で入力してください。", "params": "—" },
+    { "id": "MSG-E007", "type": "エラー", "text": "合計金額が1,000,000円以上のため、承認者を選択してください。", "params": "—" },
+    { "id": "MSG-E008", "type": "エラー", "text": "登録者本人を承認者に選択することはできません。", "params": "—" },
+    { "id": "MSG-E009", "type": "エラー", "text": "備考は200文字以内で入力してください。", "params": "—" },
+    { "id": "MSG-E010", "type": "エラー", "text": "合計金額が0円のため、受注を登録できません。", "params": "—" },
+    { "id": "MSG-E011", "type": "エラー", "text": "入力内容にエラーがあります（{0}件）。内容を確認してください。", "params": "{0}＝エラー件数" },
+    { "id": "MSG-I001", "type": "情報", "text": "受注を登録しました（受注番号：{0}、ステータス：受注確定）。", "params": "{0}＝受注番号" },
+    { "id": "MSG-I002", "type": "情報", "text": "受注を登録し、承認を依頼しました（受注番号：{0}、承認者：{1}）。", "params": "{0}＝受注番号、{1}＝承認者名" },
+    { "id": "MSG-Q001", "type": "確認", "text": "入力内容をクリアします。よろしいですか？", "params": "—" }
+  ],
+  "states": [
+    { "id": "ST-01", "name": "初期表示", "display": "入力項目は初期値。A-02 は非表示。", "buttons": "BTN-01、BTN-03 活性／BTN-02、BTN-04 非活性", "transitions": "入力 → ST-02" },
+    { "id": "ST-02", "name": "入力中", "display": "入力可能。承認者の必須表示は BR-002 に従う。", "buttons": "BTN-04 は BR-004 に従う", "transitions": "エラー発生 → ST-03／確認 → ST-04" },
+    { "id": "ST-03", "name": "入力エラー", "display": "エラー項目を赤枠で表示し、項目の下にメッセージを表示する。確認ボタン押下時は A-02 にエラー件数と一覧を表示する。", "buttons": "BTN-04 非活性（エラー解消まで）", "transitions": "エラー解消 → ST-02" },
+    { "id": "ST-04", "name": "確認", "display": "入力内容を読み取り専用で表示する。承認が必要な場合は承認者を強調表示する。", "buttons": "BTN-05、BTN-06 のみ表示", "transitions": "戻る → ST-02／登録 → ST-05" },
+    { "id": "ST-05", "name": "登録処理中", "display": "処理中の表示を出す。", "buttons": "全ボタン非活性（二重送信防止）", "transitions": "完了 → ST-06" },
+    { "id": "ST-06", "name": "登録完了", "display": "受注番号と MSG-I001 または MSG-I002 を表示する。", "buttons": "BTN-07 のみ表示", "transitions": "新規受注 → ST-01" }
+  ],
+  "testData": {
+    "customers": [
+      { "code": "C00001", "name": "株式会社サンプル商事", "status": "取引中" },
+      { "code": "C00002", "name": "テスト工業株式会社", "status": "取引中" },
+      { "code": "C00099", "name": "停止物産株式会社", "status": "取引停止" }
+    ],
+    "products": [
+      { "code": "P-1001", "name": "業務用ノートPC", "price": "158000" },
+      { "code": "P-1002", "name": "27インチモニター", "price": "42800" },
+      { "code": "P-2001", "name": "年間保守サービス", "price": "120000" },
+      { "code": "P-3001", "name": "サーバー構築一式", "price": "909091" },
+      { "code": "P-9000", "name": "販促サンプル品", "price": "0" }
+    ],
+    "users": [
+      { "code": "U001", "name": "山田 太郎", "role": "営業担当者" },
+      { "code": "U101", "name": "佐藤 花子", "role": "営業マネージャー" },
+      { "code": "U102", "name": "鈴木 一郎", "role": "営業マネージャー" }
+    ]
+  }
+}
